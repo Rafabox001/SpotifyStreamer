@@ -7,13 +7,15 @@
         <item name="actionBarStyle">@style/MyActionBar</item>
         <item name="android:titleTextStyle" tools:ignore="NewApi">@color/actionBarText</item>
         <item name="titleTextStyle">@color/actionBarText</item>
-        <item name="android:textColor" tools:ignore="NewApi">@color/deepPurple</item>
+        <item name="android:textColor" tools:ignore="NewApi">@color/text</item>
+        <item name="homeAsUpIndicator">@drawable/abc_ic_ab_back_mtrl_am_alpha</item>
+        <item name="android:homeAsUpIndicator" tools:ignore="NewApi">@drawable/abc_ic_ab_back_mtrl_am_alpha</item>
 
     </style>
 
     <style name="MyActionBar" parent="Widget.AppCompat.ActionBar">
-        <item name="background">@color/deepPurple</item>
-        <item name="android:background" tools:ignore="NewApi">@color/deepPurple</item>
+        <item name="background">@color/actionBar</item>
+        <item name="android:background" tools:ignore="NewApi">@color/actionBar</item>
         <item name="android:textColor" tools:ignore="NewApi">@color/actionBarText</item>
     </style>
 

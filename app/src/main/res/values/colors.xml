@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <color name="black">#000000</color>
-    <color name="white">#FFFFFF</color>
-    <color name="deepPurple">#673AB7</color>
-    <color name="back">#D1C4E9</color>
+    <color name="text">#37474F</color>
+    <color name="actionBar">#607D8B</color>
+    <color name="back">#BDBDBD</color>
     <color name="actionBarText">#EDE7F6</color>
 </resources>

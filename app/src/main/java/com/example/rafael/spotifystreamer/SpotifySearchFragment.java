@@ -1,5 +1,6 @@
 package com.example.rafael.spotifystreamer;
 
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -13,6 +14,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -41,6 +43,7 @@ import java.util.StringTokenizer;
 
 import butterknife.ButterKnife;
 import butterknife.InjectView;
+import butterknife.OnItemClick;
 import kaaes.spotify.webapi.android.SpotifyApi;
 import kaaes.spotify.webapi.android.SpotifyService;
 import kaaes.spotify.webapi.android.models.Artist;
@@ -80,26 +83,38 @@ public class SpotifySearchFragment extends Fragment {
             @Override
             public void afterTextChanged(Editable s) {
 
-                /** We filter artist on each change of the EditText
+                /**
+                 *  We filter artist on each change of the EditText
                  *  I´m not sure if it is the right approach but it was the more friendly
                  *  I could think of
                  */
-                if (!spotifySearch.getText().toString().contentEquals("")){
+                if (!spotifySearch.getText().toString().contentEquals("")) {
                     searchArtist();
                 }
 
+            }
+        });
 
-
-
+        spotifyList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                String artistID = fancyAdapter.getItem(position).id;
+                Log.d("ID", artistID);
+                Intent i = new Intent(getActivity(), TopTracksActivity.class)
+                        .putExtra(Intent.EXTRA_TEXT, artistID);
+                i.putExtra("artist", fancyAdapter.getItem(position).name);
+                startActivity(i);
             }
         });
 
         return rootView;
     }
 
+
+
     private void searchArtist() {
-        retrieveSpotifyData weatherTask = new retrieveSpotifyData();
-        weatherTask.execute(spotifySearch.getText().toString());
+        retrieveSpotifyData spotifyTask = new retrieveSpotifyData();
+        spotifyTask.execute(spotifySearch.getText().toString());
     }
 
     class FancyAdapter extends ArrayAdapter<Artist> {
