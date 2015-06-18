@@ -4,7 +4,9 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.os.Parcelable;
 import android.preference.PreferenceManager;
+import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
 import android.text.Editable;
@@ -37,7 +39,10 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Iterator;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Locale;
 import java.util.NoSuchElementException;
 import java.util.StringTokenizer;
@@ -59,6 +64,7 @@ public class SpotifySearchFragment extends Fragment {
     @InjectView(R.id.spotify_search_text) EditText spotifySearch;
     @InjectView(R.id.spotify_search_list) ListView spotifyList;
     private List<Artist> artistsList;
+    private List<MyArtist> storedList;
     private FancyAdapter fancyAdapter;
 
     public SpotifySearchFragment() {
@@ -69,6 +75,18 @@ public class SpotifySearchFragment extends Fragment {
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_main, container, false);
         ButterKnife.inject(this, rootView);
+        if (savedInstanceState != null && savedInstanceState.containsKey("artist")){
+            storedList = savedInstanceState.getParcelableArrayList("artist");
+            for (int i = 0; i < storedList.size(); i++){
+                Artist storedArtist = (Artist) storedList.get(i);
+                artistsList.add(storedArtist);
+
+                fancyAdapter = new FancyAdapter();
+                spotifyList.setAdapter(fancyAdapter);
+                fancyAdapter.notifyDataSetChanged();
+            }
+        }
+
 
         spotifySearch.addTextChangedListener(new TextWatcher() {
             @Override
@@ -95,6 +113,7 @@ public class SpotifySearchFragment extends Fragment {
 
             }
         });
+        storedList = new ArrayList<>();
 
         spotifyList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
@@ -116,6 +135,35 @@ public class SpotifySearchFragment extends Fragment {
     private void searchArtist() {
         retrieveSpotifyData spotifyTask = new retrieveSpotifyData();
         spotifyTask.execute(spotifySearch.getText().toString());
+    }
+
+    @Override
+    public void onActivityCreated(Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+
+        // get saved datasource if present
+        if (savedInstanceState != null) {
+            storedList = savedInstanceState.getParcelableArrayList("artist");
+
+            for(MyArtist artist : storedList){
+                Artist recover = new Artist();
+                recover.name = artist.name;
+                recover.id = artist.id;
+                recover.images = artist.images;
+                artistsList.add(recover);
+            }
+
+
+            fancyAdapter = new FancyAdapter();
+            spotifyList.setAdapter(fancyAdapter);
+            fancyAdapter.notifyDataSetChanged();
+        }
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putParcelableArrayList("artist", (ArrayList<? extends Parcelable>) storedList);
     }
 
     class FancyAdapter extends ArrayAdapter<Artist> {
@@ -202,6 +250,10 @@ public class SpotifySearchFragment extends Fragment {
                     artistsList = new ArrayList<Artist>();
                 } else {
                     artistsList.clear();
+                }
+
+                for(Artist artist : result.artists.items){
+                    storedList.add(new MyArtist(artist));
                 }
 
                 artistsList = result.artists.items;
