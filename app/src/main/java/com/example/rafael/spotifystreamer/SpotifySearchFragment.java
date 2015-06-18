@@ -80,7 +80,15 @@ public class SpotifySearchFragment extends Fragment {
             @Override
             public void afterTextChanged(Editable s) {
 
-                searchArtist();
+                /** We filter artist on each change of the EditText
+                 *  I´m not sure if it is the right approach but it was the more friendly
+                 *  I could think of
+                 */
+                if (!spotifySearch.getText().toString().contentEquals("")){
+                    searchArtist();
+                }
+
+
 
 
             }
@@ -104,7 +112,6 @@ public class SpotifySearchFragment extends Fragment {
 
             int resource;
             LayoutInflater inflater = getActivity().getLayoutInflater();
-            System.out.println("getview: "+position+" "+convertView);
 
 
             if (convertView == null) {
@@ -113,11 +120,14 @@ public class SpotifySearchFragment extends Fragment {
                 convertView = inflater.inflate(resource, parent, false);
                 holder = new ViewHolder(convertView);
 
+                holder.populateFrom(artistsList.get(position));
                 convertView.setTag(holder);
+            }else {
+                holder = (ViewHolder) convertView.getTag();
                 holder.populateFrom(artistsList.get(position));
             }
 
-            return(convertView);
+            return convertView;
         }
     }
 
@@ -155,6 +165,7 @@ public class SpotifySearchFragment extends Fragment {
         @Override
         protected ArtistsPager doInBackground(String... params) {
 
+            // We pass the filter text and call spotify wrapper API to get the artist´s
 
             SpotifyApi api = new SpotifyApi();
             SpotifyService spotify = api.getService();
@@ -167,6 +178,8 @@ public class SpotifySearchFragment extends Fragment {
         @Override
         protected void onPostExecute(ArtistsPager result) {
             super.onPostExecute(result);
+
+            //We dd the results to a list and call the adapter so the view get´s updated
 
             if (result != null) {
                 if (artistsList == null) {
