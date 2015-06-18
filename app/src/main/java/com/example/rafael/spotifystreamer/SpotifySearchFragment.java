@@ -21,6 +21,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.squareup.picasso.Picasso;
 
@@ -204,12 +205,19 @@ public class SpotifySearchFragment extends Fragment {
                 }
 
                 artistsList = result.artists.items;
+                if (artistsList.size() == 0){
+                    ToastText(getActivity().getResources().getString(R.string.notFound));
+                }
                 fancyAdapter = new FancyAdapter();
                 spotifyList.setAdapter(fancyAdapter);
                 fancyAdapter.notifyDataSetChanged();
             }
 
 
+        }
+
+        void ToastText(String s){
+            Toast.makeText(getActivity(), s, Toast.LENGTH_SHORT).show();
         }
 
 
