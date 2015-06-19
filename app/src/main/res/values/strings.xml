@@ -4,4 +4,5 @@
     <string name="title_activity_top_tracks">Top 10 Tracks</string>
     <string name="hint">Enter the name of the artist&#8230;</string>
     <string name="notFound">Artist not found, please refine your search criteria and try again</string>
+    <string name="spotifyError">Something when wrong while retrieving the data, error is: </string>
 </resources>

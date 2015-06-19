@@ -9,6 +9,7 @@ import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
+import android.support.v7.widget.SearchView;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.text.format.Time;
@@ -51,21 +52,25 @@ import butterknife.ButterKnife;
 import butterknife.InjectView;
 import butterknife.OnItemClick;
 import kaaes.spotify.webapi.android.SpotifyApi;
+import kaaes.spotify.webapi.android.SpotifyCallback;
+import kaaes.spotify.webapi.android.SpotifyError;
 import kaaes.spotify.webapi.android.SpotifyService;
 import kaaes.spotify.webapi.android.models.Artist;
 import kaaes.spotify.webapi.android.models.ArtistsPager;
 import kaaes.spotify.webapi.android.models.Image;
+import retrofit.RetrofitError;
+import retrofit.client.Response;
 
 
 /**
  * A placeholder fragment containing a simple view.
  */
 public class SpotifySearchFragment extends Fragment {
-    @InjectView(R.id.spotify_search_text) EditText spotifySearch;
+    @InjectView(R.id.search_artist) SearchView spotifySearch;
     @InjectView(R.id.spotify_search_list) ListView spotifyList;
-    private List<Artist> artistsList;
     private List<MyArtist> storedList;
     private FancyAdapter fancyAdapter;
+    private String recoveredFilter = "";
 
     public SpotifySearchFragment() {
     }
@@ -75,54 +80,48 @@ public class SpotifySearchFragment extends Fragment {
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_main, container, false);
         ButterKnife.inject(this, rootView);
-        if (savedInstanceState != null && savedInstanceState.containsKey("artist")){
-            storedList = savedInstanceState.getParcelableArrayList("artist");
-            for (int i = 0; i < storedList.size(); i++){
-                Artist storedArtist = (Artist) storedList.get(i);
-                artistsList.add(storedArtist);
-
-                fancyAdapter = new FancyAdapter();
-                spotifyList.setAdapter(fancyAdapter);
-                fancyAdapter.notifyDataSetChanged();
-            }
-        }
 
 
-        spotifySearch.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+        spotifySearch.setOnQueryTextListener(
+                new SearchView.OnQueryTextListener() {
+                    @Override
+                    public boolean onQueryTextSubmit(String query) {
+                        // Start searching on submit
+                        // ...
+                        /**
+                         *  We filter artist on each change of the EditText
+                         *  I´m not sure if it is the right approach but it was the more friendly
+                         *  I could think of
+                         */
+                        if (!query.contentEquals("") && !query.contentEquals(recoveredFilter)) {
+                            searchArtist();
+                        }
+                        return true;
+                    }
+                    @Override
+                    public boolean onQueryTextChange(String newText) {
+                        /**
+                         *  We filter artist on each change of the EditText
+                         *  I´m not sure if it is the right approach but it was the more friendly
+                         *  I could think of
+                         */
+                        if (!newText.contentEquals("") && !newText.contentEquals(recoveredFilter)) {
+                            searchArtist();
+                        }
+                        return true;
+                    }
+                });
 
-            }
 
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-
-            }
-
-            @Override
-            public void afterTextChanged(Editable s) {
-
-                /**
-                 *  We filter artist on each change of the EditText
-                 *  I´m not sure if it is the right approach but it was the more friendly
-                 *  I could think of
-                 */
-                if (!spotifySearch.getText().toString().contentEquals("")) {
-                    searchArtist();
-                }
-
-            }
-        });
-        storedList = new ArrayList<>();
 
         spotifyList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                String artistID = fancyAdapter.getItem(position).id;
+                String artistID = fancyAdapter.getItem(position).artistId;
                 Log.d("ID", artistID);
                 Intent i = new Intent(getActivity(), TopTracksActivity.class)
                         .putExtra(Intent.EXTRA_TEXT, artistID);
-                i.putExtra("artist", fancyAdapter.getItem(position).name);
+                i.putExtra("artist", fancyAdapter.getItem(position).artistName);
                 startActivity(i);
             }
         });
@@ -134,7 +133,7 @@ public class SpotifySearchFragment extends Fragment {
 
     private void searchArtist() {
         retrieveSpotifyData spotifyTask = new retrieveSpotifyData();
-        spotifyTask.execute(spotifySearch.getText().toString());
+        spotifyTask.execute(spotifySearch.getQuery().toString());
     }
 
     @Override
@@ -144,15 +143,7 @@ public class SpotifySearchFragment extends Fragment {
         // get saved datasource if present
         if (savedInstanceState != null) {
             storedList = savedInstanceState.getParcelableArrayList("artist");
-
-            for(MyArtist artist : storedList){
-                Artist recover = new Artist();
-                recover.name = artist.name;
-                recover.id = artist.id;
-                recover.images = artist.images;
-                artistsList.add(recover);
-            }
-
+            recoveredFilter = savedInstanceState.getString("filter");
 
             fancyAdapter = new FancyAdapter();
             spotifyList.setAdapter(fancyAdapter);
@@ -164,11 +155,12 @@ public class SpotifySearchFragment extends Fragment {
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         outState.putParcelableArrayList("artist", (ArrayList<? extends Parcelable>) storedList);
+        outState.putString("filter", spotifySearch.getQuery().toString());
     }
 
-    class FancyAdapter extends ArrayAdapter<Artist> {
+    class FancyAdapter extends ArrayAdapter<MyArtist> {
         FancyAdapter(){
-            super(getActivity(), android.R.layout.simple_list_item_1, artistsList);
+            super(getActivity(), android.R.layout.simple_list_item_1, storedList);
         }
 
         public View getView(int position, View convertView, ViewGroup parent){
@@ -184,11 +176,11 @@ public class SpotifySearchFragment extends Fragment {
                 convertView = inflater.inflate(resource, parent, false);
                 holder = new ViewHolder(convertView);
 
-                holder.populateFrom(artistsList.get(position));
+                holder.populateFrom(storedList.get(position));
                 convertView.setTag(holder);
             }else {
                 holder = (ViewHolder) convertView.getTag();
-                holder.populateFrom(artistsList.get(position));
+                holder.populateFrom(storedList.get(position));
             }
 
             return convertView;
@@ -206,18 +198,14 @@ public class SpotifySearchFragment extends Fragment {
 
         }
 
-        void populateFrom(Artist artist){
-            name.setText(artist.name);
-            List<Image> img = artist.images;
-            int sizeOfList = img.size();
-            Log.d("Size", String.valueOf(sizeOfList));
-            if (sizeOfList > 0){
-                Picasso.with(getActivity()).load(artist.images.get(sizeOfList-1).url).into(thumbnail);
-                Picasso.with(getActivity()).load(artist.images.get(1).url).into(back);
+        void populateFrom(MyArtist artist){
+            name.setText(artist.artistName);
+            if (artist.artistImage != null){
+                Picasso.with(getActivity()).load(artist.artistImage).into(thumbnail);
             }
-
-
-
+            if (artist.backImage != null){
+                Picasso.with(getActivity()).load(artist.backImage).into(back);
+            }
         }
     }
 
@@ -229,11 +217,16 @@ public class SpotifySearchFragment extends Fragment {
         @Override
         protected ArtistsPager doInBackground(String... params) {
 
-            // We pass the filter text and call spotify wrapper API to get the artist´s
+            ArtistsPager results = null;
 
-            SpotifyApi api = new SpotifyApi();
-            SpotifyService spotify = api.getService();
-            ArtistsPager results = spotify.searchArtists(params[0]);
+            // We pass the filter text and call spotify wrapper API to get the artist´s
+            try{
+                SpotifyApi api = new SpotifyApi();
+                SpotifyService spotify = api.getService();
+                results = spotify.searchArtists(params[0]);
+            }catch (RetrofitError e){
+                ToastText(getActivity().getResources().getString(R.string.spotifyError) + " " + e.toString());
+            }
 
 
             return results;
@@ -243,26 +236,28 @@ public class SpotifySearchFragment extends Fragment {
         protected void onPostExecute(ArtistsPager result) {
             super.onPostExecute(result);
 
+
             //We dd the results to a list and call the adapter so the view get´s updated
 
             if (result != null) {
-                if (artistsList == null) {
-                    artistsList = new ArrayList<Artist>();
+                if (storedList == null) {
+                    storedList = new ArrayList<MyArtist>();
                 } else {
-                    artistsList.clear();
+                    storedList.clear();
                 }
 
                 for(Artist artist : result.artists.items){
                     storedList.add(new MyArtist(artist));
                 }
 
-                artistsList = result.artists.items;
-                if (artistsList.size() == 0){
+                if (storedList.size() == 0){
                     ToastText(getActivity().getResources().getString(R.string.notFound));
+                }else{
+                    fancyAdapter = new FancyAdapter();
+                    spotifyList.setAdapter(fancyAdapter);
+                    fancyAdapter.notifyDataSetChanged();
                 }
-                fancyAdapter = new FancyAdapter();
-                spotifyList.setAdapter(fancyAdapter);
-                fancyAdapter.notifyDataSetChanged();
+
             }
 
 

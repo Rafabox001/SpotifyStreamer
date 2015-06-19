@@ -16,15 +16,15 @@ public class MyArtist extends Artist implements Parcelable{
     String artistName;
     String artistId;
     String artistImage;
+    String backImage;
 
     public MyArtist(Artist artist) {
         artistName = artist.name;
         artistId = artist.id;
-        for (Image image : artist.images) {
-            if (image.width >= 150 && image.width <= 300) {
-                artistImage = image.url;
-                break;
-            }
+        int sizeOfList = artist.images.size();
+        if (sizeOfList > 0){
+            artistImage = artist.images.get(sizeOfList - 1).url;
+            backImage = artist.images.get(1).url;
         }
     }
 
@@ -38,6 +38,7 @@ public class MyArtist extends Artist implements Parcelable{
         dest.writeString(artistName);
         dest.writeString(artistId);
         dest.writeString(artistImage);
+        dest.writeString(backImage);
     }
 
     public static final Parcelable.Creator<MyArtist> CREATOR
@@ -60,5 +61,6 @@ public class MyArtist extends Artist implements Parcelable{
         artistName = in.readString();
         artistId = in.readString();
         artistImage = in.readString();
+        backImage = in.readString();
     }
 }

@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
+import android.os.Parcelable;
 import android.preference.PreferenceActivity;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
@@ -23,6 +24,7 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.squareup.picasso.Picasso;
 
@@ -42,6 +44,7 @@ import kaaes.spotify.webapi.android.models.Image;
 import kaaes.spotify.webapi.android.models.Track;
 import kaaes.spotify.webapi.android.models.Tracks;
 import kaaes.spotify.webapi.android.models.TracksPager;
+import retrofit.RetrofitError;
 
 
 /**
@@ -50,9 +53,10 @@ import kaaes.spotify.webapi.android.models.TracksPager;
 public class TopTracksActivityFragment extends Fragment {
 
     @InjectView(R.id.songsList) ListView songsList;
-    private List<Track> trackList;
+    private List<MyTrack> myTrackList;
     private FancyAdapter fancyAdapter;
     private String mId;
+    private String recoveredId = "";
 
     public TopTracksActivityFragment() {
     }
@@ -84,9 +88,19 @@ public class TopTracksActivityFragment extends Fragment {
         ((ActionBarActivity) getActivity()).getSupportActionBar().setHomeAsUpIndicator(upArrow);
         ((ActionBarActivity) getActivity()).getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         ((ActionBarActivity) getActivity()).getSupportActionBar().setSubtitle(extra.getString("artist"));
+        if (savedInstanceState != null) {
+            myTrackList = savedInstanceState.getParcelableArrayList("tracks");
+            recoveredId = savedInstanceState.getString("id");
 
+            fancyAdapter = new FancyAdapter();
+            songsList.setAdapter(fancyAdapter);
+            fancyAdapter.notifyDataSetChanged();
+        }
 
-        getTracks(mId);
+        if (recoveredId.contentEquals("") && !recoveredId.contentEquals(mId)){
+            getTracks(mId);
+        }
+
 
         return rootView;
     }
@@ -96,9 +110,31 @@ public class TopTracksActivityFragment extends Fragment {
         songsTask.execute(id);
     }
 
-    class FancyAdapter extends ArrayAdapter<Track> {
+    @Override
+    public void onActivityCreated(Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+
+        // get saved datasource if present
+        if (savedInstanceState != null) {
+            myTrackList = savedInstanceState.getParcelableArrayList("tracks");
+            recoveredId = savedInstanceState.getString("id");
+
+            fancyAdapter = new FancyAdapter();
+            songsList.setAdapter(fancyAdapter);
+            fancyAdapter.notifyDataSetChanged();
+        }
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putParcelableArrayList("tracks", (ArrayList<? extends Parcelable>) myTrackList);
+        outState.putString("id", mId);
+    }
+
+    class FancyAdapter extends ArrayAdapter<MyTrack> {
         FancyAdapter(){
-            super(getActivity(), android.R.layout.simple_list_item_1, trackList);
+            super(getActivity(), android.R.layout.simple_list_item_1, myTrackList);
         }
 
         public View getView(int position, View convertView, ViewGroup parent){
@@ -115,7 +151,7 @@ public class TopTracksActivityFragment extends Fragment {
                 holder = new ViewHolder(convertView);
 
                 if (position < 10){
-                    holder.populateFrom(trackList.get(position));
+                    holder.populateFrom(myTrackList.get(position));
                     convertView.setTag(holder);
                 }
 
@@ -123,7 +159,7 @@ public class TopTracksActivityFragment extends Fragment {
             }else {
 
                 holder = (ViewHolder) convertView.getTag();
-                holder.populateFrom(trackList.get(position));
+                holder.populateFrom(myTrackList.get(position));
             }
 
             return convertView;
@@ -142,17 +178,15 @@ public class TopTracksActivityFragment extends Fragment {
 
         }
 
-        void populateFrom(Track track){
-            album.setText(track.album.name);
-            song.setText(track.name);
-            List<Image> img = track.album.images;
-            int sizeOfList = img.size();
-            Log.d("Size", String.valueOf(sizeOfList));
-            if (sizeOfList > 0){
-                Picasso.with(getActivity()).load(track.album.images.get(sizeOfList-1).url).into(thumbnail);
-                Picasso.with(getActivity()).load(track.album.images.get(1).url).into(back);
+        void populateFrom(MyTrack track){
+            album.setText(track.trackAlbum);
+            song.setText(track.trackName);
+            if (track.trackImage != null){
+                Picasso.with(getActivity()).load(track.trackImage).into(thumbnail);
             }
-
+            if (track.trackBackImage !=null){
+                Picasso.with(getActivity()).load(track.trackBackImage).into(back);
+            }
 
 
         }
@@ -167,13 +201,20 @@ public class TopTracksActivityFragment extends Fragment {
         protected Tracks doInBackground(String... params) {
 
             // We pass the filter text and call spotify wrapper API to get the artist´s
+            Tracks tracks = null;
 
-            SpotifyApi api = new SpotifyApi();
-            SpotifyService spotify = api.getService();
-            //We use this map as a country parameter to get the top tracks of the desired artist
-            Map<String, Object> map = new HashMap<>();
-            map.put("country", Locale.getDefault().getCountry());
-            Tracks tracks = spotify.getArtistTopTrack(params[0], map);
+            try{
+                SpotifyApi api = new SpotifyApi();
+                SpotifyService spotify = api.getService();
+                //We use this map as a country parameter to get the top tracks of the desired artist
+                Map<String, Object> map = new HashMap<>();
+                map.put("country", Locale.getDefault().getCountry());
+                tracks = spotify.getArtistTopTrack(params[0], map);
+            }catch (RetrofitError e){
+                ToastText(getActivity().getResources().getString(R.string.spotifyError) + " " + e.toString());
+            }
+
+
 
 
 
@@ -187,19 +228,24 @@ public class TopTracksActivityFragment extends Fragment {
             //We dd the results to a list and call the adapter so the view get´s updated
 
             if (result != null) {
-                if (trackList == null) {
-                    trackList = new ArrayList<Track>();
+                if (myTrackList == null) {
+                    myTrackList = new ArrayList<MyTrack>();
                 } else {
-                    trackList.clear();
+                    myTrackList.clear();
                 }
-
-                trackList = result.tracks;
+                for(Track track : result.tracks){
+                    myTrackList.add(new MyTrack(track));
+                }
                 fancyAdapter = new FancyAdapter();
                 songsList.setAdapter(fancyAdapter);
                 fancyAdapter.notifyDataSetChanged();
             }
 
 
+        }
+
+        void ToastText(String s){
+            Toast.makeText(getActivity(), s, Toast.LENGTH_SHORT).show();
         }
 
 
