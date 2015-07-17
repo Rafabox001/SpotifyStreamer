@@ -17,6 +17,8 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
@@ -118,11 +120,12 @@ public class SpotifySearchFragment extends Fragment {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 String artistID = fancyAdapter.getItem(position).artistId;
-                Log.d("ID", artistID);
-                Intent i = new Intent(getActivity(), TopTracksActivity.class)
-                        .putExtra(Intent.EXTRA_TEXT, artistID);
-                i.putExtra("artist", fancyAdapter.getItem(position).artistName);
-                startActivity(i);
+                String artistName = fancyAdapter.getItem(position).artistName;
+                if (artistID != null){
+                    ((Callback)getActivity())
+                            .onItemSelected(artistID, artistName);
+                }
+
             }
         });
 
@@ -158,6 +161,23 @@ public class SpotifySearchFragment extends Fragment {
         outState.putString("filter", spotifySearch.getQuery().toString());
     }
 
+    @Override
+    public void onViewStateRestored(Bundle savedInstanceState) {
+        // get saved datasource if present
+
+        if (savedInstanceState != null) {
+            storedList = savedInstanceState.getParcelableArrayList("artist");
+            recoveredFilter = savedInstanceState.getString("filter");
+
+            fancyAdapter = new FancyAdapter();
+            spotifyList.setAdapter(fancyAdapter);
+            fancyAdapter.notifyDataSetChanged();
+        }
+        super.onViewStateRestored(savedInstanceState);
+    }
+
+
+
     class FancyAdapter extends ArrayAdapter<MyArtist> {
         FancyAdapter(){
             super(getActivity(), android.R.layout.simple_list_item_1, storedList);
@@ -182,6 +202,9 @@ public class SpotifySearchFragment extends Fragment {
                 holder = (ViewHolder) convertView.getTag();
                 holder.populateFrom(storedList.get(position));
             }
+
+            Animation animation = AnimationUtils.loadAnimation(getActivity().getApplicationContext(), R.anim.slide_top_to_bottom);
+            convertView.startAnimation(animation);
 
             return convertView;
         }
@@ -268,5 +291,24 @@ public class SpotifySearchFragment extends Fragment {
         }
 
 
+    }
+
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+        setRetainInstance(true);
+    }
+
+    /**
+     * A callback interface that all activities containing this fragment must
+     * implement. This mechanism allows activities to be notified of item
+     * selections.
+     */
+    public interface Callback {
+        /**
+         * DetailFragmentCallback for when an item has been selected.
+         */
+        public void onItemSelected(String artistId, String artistName);
     }
 }

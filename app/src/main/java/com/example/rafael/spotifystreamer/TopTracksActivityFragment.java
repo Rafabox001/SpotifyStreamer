@@ -21,6 +21,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
+import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -53,10 +54,12 @@ import retrofit.RetrofitError;
 public class TopTracksActivityFragment extends Fragment {
 
     @InjectView(R.id.songsList) ListView songsList;
+    @InjectView(R.id.songsGrid) GridView songsGrid;
     private List<MyTrack> myTrackList;
     private FancyAdapter fancyAdapter;
     private String mId;
     private String recoveredId = "";
+    private Boolean grid = false;
 
     public TopTracksActivityFragment() {
     }
@@ -79,27 +82,46 @@ public class TopTracksActivityFragment extends Fragment {
         ButterKnife.inject(this, rootView);
 
         //We get the intent of the previous activity to retrieve the id we´ll use to search the tracks
-        Intent intent = getActivity().getIntent();
-        Bundle extra = intent.getExtras();
-        mId = intent.getStringExtra(Intent.EXTRA_TEXT);
+        Bundle arguments = getArguments();
+        if (arguments != null){
+            mId = arguments.getString("artistId");
+            grid = true;
+            songsGrid.setVisibility(View.VISIBLE);
+            songsList.setVisibility(View.INVISIBLE);
+        }else{
+            Intent intent = getActivity().getIntent();
+            Bundle extra = intent.getExtras();
+            mId = intent.getStringExtra(Intent.EXTRA_TEXT);
+        }
+
 
         final Drawable upArrow = getResources().getDrawable(R.drawable.abc_ic_ab_back_mtrl_am_alpha);
         upArrow.setColorFilter(getResources().getColor(R.color.actionBarText), PorterDuff.Mode.SRC_ATOP);
-        ((ActionBarActivity) getActivity()).getSupportActionBar().setHomeAsUpIndicator(upArrow);
-        ((ActionBarActivity) getActivity()).getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        ((ActionBarActivity) getActivity()).getSupportActionBar().setSubtitle(extra.getString("artist"));
+        //((ActionBarActivity) getActivity()).getSupportActionBar().setHomeAsUpIndicator(upArrow);
+        //((ActionBarActivity) getActivity()).getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        //((ActionBarActivity) getActivity()).getSupportActionBar().setSubtitle(extra.getString("artist"));
         if (savedInstanceState != null) {
             myTrackList = savedInstanceState.getParcelableArrayList("tracks");
             recoveredId = savedInstanceState.getString("id");
 
-            fancyAdapter = new FancyAdapter();
-            songsList.setAdapter(fancyAdapter);
-            fancyAdapter.notifyDataSetChanged();
+            if (!grid){
+                fancyAdapter = new FancyAdapter();
+                songsList.setAdapter(fancyAdapter);
+                fancyAdapter.notifyDataSetChanged();
+            }else{
+                fancyAdapter = new FancyAdapter();
+                songsGrid.setAdapter(fancyAdapter);
+                fancyAdapter.notifyDataSetChanged();
+            }
+
+
+        }
+        if (mId!=null){
+            if (recoveredId.contentEquals("") && !recoveredId.contentEquals(mId)){
+                getTracks(mId);
+            }
         }
 
-        if (recoveredId.contentEquals("") && !recoveredId.contentEquals(mId)){
-            getTracks(mId);
-        }
 
 
         return rootView;
@@ -119,9 +141,17 @@ public class TopTracksActivityFragment extends Fragment {
             myTrackList = savedInstanceState.getParcelableArrayList("tracks");
             recoveredId = savedInstanceState.getString("id");
 
-            fancyAdapter = new FancyAdapter();
-            songsList.setAdapter(fancyAdapter);
-            fancyAdapter.notifyDataSetChanged();
+            if (!grid){
+                fancyAdapter = new FancyAdapter();
+                songsList.setAdapter(fancyAdapter);
+                fancyAdapter.notifyDataSetChanged();
+            }else{
+                fancyAdapter = new FancyAdapter();
+                songsGrid.setAdapter(fancyAdapter);
+                fancyAdapter.notifyDataSetChanged();
+            }
+
+
         }
     }
 
@@ -236,9 +266,16 @@ public class TopTracksActivityFragment extends Fragment {
                 for(Track track : result.tracks){
                     myTrackList.add(new MyTrack(track));
                 }
-                fancyAdapter = new FancyAdapter();
-                songsList.setAdapter(fancyAdapter);
-                fancyAdapter.notifyDataSetChanged();
+                if (!grid){
+                    fancyAdapter = new FancyAdapter();
+                    songsList.setAdapter(fancyAdapter);
+                    fancyAdapter.notifyDataSetChanged();
+                }else{
+                    fancyAdapter = new FancyAdapter();
+                    songsGrid.setAdapter(fancyAdapter);
+                    fancyAdapter.notifyDataSetChanged();
+                }
+
             }
 
 

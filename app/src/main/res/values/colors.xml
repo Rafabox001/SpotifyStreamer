@@ -5,4 +5,6 @@
     <color name="actionBar">#607D8B</color>
     <color name="back">#BDBDBD</color>
     <color name="actionBarText">#EDE7F6</color>
+    <color name="darkPrimary">#455A64</color>
+    <color name="accent">#03A9F4</color>
 </resources>
