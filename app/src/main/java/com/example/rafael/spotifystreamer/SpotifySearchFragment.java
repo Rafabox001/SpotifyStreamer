@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.os.Handler;
 import android.os.Parcelable;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
@@ -18,7 +19,9 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.Animation;
+import android.view.animation.AnimationSet;
 import android.view.animation.AnimationUtils;
+import android.view.animation.LayoutAnimationController;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
@@ -74,6 +77,9 @@ public class SpotifySearchFragment extends Fragment {
     private FancyAdapter fancyAdapter;
     private String recoveredFilter = "";
 
+    private AnimationSet set;
+    private LayoutAnimationController controller;
+
     public SpotifySearchFragment() {
     }
 
@@ -82,6 +88,17 @@ public class SpotifySearchFragment extends Fragment {
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_main, container, false);
         ButterKnife.inject(this, rootView);
+
+        set = new AnimationSet(true);
+        Animation animation = AnimationUtils.loadAnimation(getActivity().getApplicationContext(), R.anim.slide_top_to_bottom);
+        animation.setDuration(1200);
+        set.addAnimation(animation);
+
+        controller = new LayoutAnimationController(set, 0.5f);
+
+        spotifyList.setLayoutAnimation(controller);
+
+
 
 
         spotifySearch.setOnQueryTextListener(
@@ -198,13 +215,17 @@ public class SpotifySearchFragment extends Fragment {
 
                 holder.populateFrom(storedList.get(position));
                 convertView.setTag(holder);
+
+
             }else {
                 holder = (ViewHolder) convertView.getTag();
                 holder.populateFrom(storedList.get(position));
             }
 
-            Animation animation = AnimationUtils.loadAnimation(getActivity().getApplicationContext(), R.anim.slide_top_to_bottom);
+            /*Animation animation = AnimationUtils.loadAnimation(getActivity().getApplicationContext(), R.anim.slide_top_to_bottom);
             convertView.startAnimation(animation);
+            convertView.animate().setDuration(1500).setStartDelay(500);*/
+
 
             return convertView;
         }
@@ -276,6 +297,10 @@ public class SpotifySearchFragment extends Fragment {
                 if (storedList.size() == 0){
                     ToastText(getActivity().getResources().getString(R.string.notFound));
                 }else{
+
+                    controller.start();
+                    spotifyList.startLayoutAnimation();
+
                     fancyAdapter = new FancyAdapter();
                     spotifyList.setAdapter(fancyAdapter);
                     fancyAdapter.notifyDataSetChanged();
