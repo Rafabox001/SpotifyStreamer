@@ -2,9 +2,12 @@
 <resources>
     <color name="black">#000000</color>
     <color name="text">#37474F</color>
-    <color name="actionBar">#607D8B</color>
+    <color name="primary">#607D8B</color>
     <color name="back">#BDBDBD</color>
     <color name="actionBarText">#EDE7F6</color>
-    <color name="darkPrimary">#455A64</color>
+    <color name="primary_dark">#455A64</color>
     <color name="accent">#03A9F4</color>
+
+    <color name="accent_translucent">#80FFEB3B</color>
+    <color name="accent_bright">#FFF493</color>
 </resources>

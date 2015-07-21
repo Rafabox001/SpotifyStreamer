@@ -138,9 +138,10 @@ public class SpotifySearchFragment extends Fragment {
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 String artistID = fancyAdapter.getItem(position).artistId;
                 String artistName = fancyAdapter.getItem(position).artistName;
+                String artistArt = fancyAdapter.getItem(position).backImage;
                 if (artistID != null){
                     ((Callback)getActivity())
-                            .onItemSelected(artistID, artistName);
+                            .onItemSelected(artistID, artistName, artistArt);
                 }
 
             }
@@ -334,6 +335,6 @@ public class SpotifySearchFragment extends Fragment {
         /**
          * DetailFragmentCallback for when an item has been selected.
          */
-        public void onItemSelected(String artistId, String artistName);
+        public void onItemSelected(String artistId, String artistName, String artistArt);
     }
 }

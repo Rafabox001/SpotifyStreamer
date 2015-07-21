@@ -1,7 +1,7 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
 
 
-    <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
+    <style name="AppTheme" parent="Theme.AppCompat.Light.NoActionBar">
         <!-- Customize your theme here. -->
         <item name="android:actionBarStyle" tools:ignore="NewApi">@style/MyActionBar</item>
         <item name="actionBarStyle">@style/MyActionBar</item>
@@ -10,17 +10,34 @@
         <item name="android:textColor" tools:ignore="NewApi">@color/text</item>
         <item name="homeAsUpIndicator">@drawable/abc_ic_ab_back_mtrl_am_alpha</item>
         <item name="android:homeAsUpIndicator" tools:ignore="NewApi">@drawable/abc_ic_ab_back_mtrl_am_alpha</item>
+        <item name="colorPrimary">@color/primary</item> 
+        <item name="colorPrimaryDark">@color/primary_dark</item> 
+        <item name="colorControlHighlight">@color/accent_translucent</item> 
+        <item name="colorAccent">@color/accent</item>
 
     </style>
 
     <style name="MyActionBar" parent="Widget.AppCompat.ActionBar">
-        <item name="background">@color/actionBar</item>
-        <item name="android:background" tools:ignore="NewApi">@color/actionBar</item>
+        <item name="background">@color/primary</item>
+        <item name="android:background" tools:ignore="NewApi">@color/primary</item>
         <item name="android:textColor" tools:ignore="NewApi">@color/actionBarText</item>
     </style>
 
     <style name="MyActionBarTitleText" parent="TextAppearance.AppCompat.Widget.ActionBar.Title">
         <item name="android:textColor">@color/actionBarText</item>
     </style>
+
+    <style name="FabStyle">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_margin">@dimen/fab_compat_margin</item>
+        <item name="android:src">@android:drawable/btn_plus</item>
+        <item name="borderWidth">0dp</item>
+        <item name="elevation">6dp</item>
+        <item name="pressedTranslationZ">12dp</item>
+        <item name="rippleColor">@android:color/white</item>
+    </style>
+
+
 
 </resources>

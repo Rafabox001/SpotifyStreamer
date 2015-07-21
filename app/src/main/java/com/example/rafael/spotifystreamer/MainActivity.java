@@ -1,16 +1,21 @@
 package com.example.rafael.spotifystreamer;
 
 import android.content.Intent;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 
 
-public class MainActivity extends ActionBarActivity implements SpotifySearchFragment.Callback{
+public class MainActivity extends AppCompatActivity implements SpotifySearchFragment.Callback{
 
     private static final String DETAILFRAGMENT_TAG = "DFTAG";
     private final String LOG_TAG = MainActivity.class.getSimpleName();
+    private static final String EXTRA_IMAGE = "com.example.rafael.spotifystreamer.extraImage";
+    private static final String EXTRA_TITLE = "com.example.rafael.spotifystreamer.extraTitle";
 
     private Boolean mTwoPane;
 
@@ -43,9 +48,20 @@ public class MainActivity extends ActionBarActivity implements SpotifySearchFrag
 
     }
 
+    private void initToolbar(){
+        final Toolbar toolbar = (Toolbar)findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+
+        final ActionBar actionBar = getSupportActionBar();
+
+        if (actionBar != null){
+            actionBar.setDisplayHomeAsUpEnabled(true);
+        }
+    }
+
 
     @Override
-    public void onItemSelected(String artistId, String artistName) {
+    public void onItemSelected(String artistId, String artistName, String artistArt) {
         if (mTwoPane){
             // In two-pane mode, show the detail view in this activity by
             // adding or replacing the detail fragment using a
@@ -66,6 +82,8 @@ public class MainActivity extends ActionBarActivity implements SpotifySearchFrag
             Intent i = new Intent(this, TopTracksActivity.class)
                     .putExtra(Intent.EXTRA_TEXT, artistId);
             i.putExtra("artist", artistName);
+            i.putExtra(EXTRA_TITLE, artistName);
+            i.putExtra(EXTRA_IMAGE, artistArt);
             startActivity(i);
         }
 

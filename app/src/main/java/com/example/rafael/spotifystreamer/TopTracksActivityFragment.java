@@ -10,6 +10,8 @@ import android.support.v4.app.Fragment;
 import android.os.Bundle;
 import android.support.v4.app.NavUtils;
 import android.support.v7.app.ActionBarActivity;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
@@ -53,7 +55,7 @@ import retrofit.RetrofitError;
  */
 public class TopTracksActivityFragment extends Fragment {
 
-    @InjectView(R.id.songsList) ListView songsList;
+    @InjectView(R.id.songsList) RecyclerView songsList;
     @InjectView(R.id.songsGrid) GridView songsGrid;
     private List<MyTrack> myTrackList;
     private FancyAdapter fancyAdapter;
@@ -83,16 +85,23 @@ public class TopTracksActivityFragment extends Fragment {
 
         //We get the intent of the previous activity to retrieve the id we´ll use to search the tracks
         Bundle arguments = getArguments();
+        songsList.setHasFixedSize(true);
+        LinearLayoutManager llm = new LinearLayoutManager(getActivity());
+        llm.setOrientation(LinearLayoutManager.VERTICAL);
+        songsList.setLayoutManager(llm);
         if (arguments != null){
             mId = arguments.getString("artistId");
             grid = true;
             songsGrid.setVisibility(View.VISIBLE);
             songsList.setVisibility(View.INVISIBLE);
+
         }else{
             Intent intent = getActivity().getIntent();
             Bundle extra = intent.getExtras();
             mId = intent.getStringExtra(Intent.EXTRA_TEXT);
         }
+
+
 
 
         final Drawable upArrow = getResources().getDrawable(R.drawable.abc_ic_ab_back_mtrl_am_alpha);
@@ -105,12 +114,12 @@ public class TopTracksActivityFragment extends Fragment {
             recoveredId = savedInstanceState.getString("id");
 
             if (!grid){
-                fancyAdapter = new FancyAdapter();
+                fancyAdapter = new FancyAdapter(myTrackList);
                 songsList.setAdapter(fancyAdapter);
                 fancyAdapter.notifyDataSetChanged();
             }else{
-                fancyAdapter = new FancyAdapter();
-                songsGrid.setAdapter(fancyAdapter);
+                //fancyAdapter = new FancyAdapter();
+                //songsGrid.setAdapter(fancyAdapter);
                 fancyAdapter.notifyDataSetChanged();
             }
 
@@ -142,12 +151,12 @@ public class TopTracksActivityFragment extends Fragment {
             recoveredId = savedInstanceState.getString("id");
 
             if (!grid){
-                fancyAdapter = new FancyAdapter();
+                fancyAdapter = new FancyAdapter(myTrackList);
                 songsList.setAdapter(fancyAdapter);
                 fancyAdapter.notifyDataSetChanged();
             }else{
-                fancyAdapter = new FancyAdapter();
-                songsGrid.setAdapter(fancyAdapter);
+                //fancyAdapter = new FancyAdapter();
+                //songsGrid.setAdapter(fancyAdapter);
                 fancyAdapter.notifyDataSetChanged();
             }
 
@@ -162,48 +171,44 @@ public class TopTracksActivityFragment extends Fragment {
         outState.putString("id", mId);
     }
 
-    class FancyAdapter extends ArrayAdapter<MyTrack> {
-        FancyAdapter(){
-            super(getActivity(), android.R.layout.simple_list_item_1, myTrackList);
+    public class FancyAdapter extends RecyclerView.Adapter<TracksViewHolder> {
+
+        private List<MyTrack> trackList;
+        public FancyAdapter(List<MyTrack> trackList){
+            this.trackList = trackList;
         }
 
-        public View getView(int position, View convertView, ViewGroup parent){
-            ViewHolder holder;
-
-            int resource;
-            LayoutInflater inflater = getActivity().getLayoutInflater();
-
-
-            if (convertView == null) {
-                resource = R.layout.spotify_list_song;
-
-                convertView = inflater.inflate(resource, parent, false);
-                holder = new ViewHolder(convertView);
-
-                if (position < 10){
-                    holder.populateFrom(myTrackList.get(position));
-                    convertView.setTag(holder);
-                }
-
-
-            }else {
-
-                holder = (ViewHolder) convertView.getTag();
-                holder.populateFrom(myTrackList.get(position));
-            }
-
-            return convertView;
+        @Override
+        public int getItemCount() {
+            return trackList.size();
         }
+
+        @Override
+        public void onBindViewHolder(TracksViewHolder tracksViewHolder, int i) {
+            tracksViewHolder.populateFrom(trackList.get(i));
+
+        }
+
+        @Override
+        public TracksViewHolder onCreateViewHolder(ViewGroup viewGroup, int i) {
+            View trackView = LayoutInflater.from(viewGroup.getContext()).
+                    inflate(R.layout.spotify_list_song, viewGroup, false);
+
+            return  new TracksViewHolder(trackView);
+        }
+
+
     }
 
-    class ViewHolder{
+    public class TracksViewHolder extends RecyclerView.ViewHolder{
         @InjectView(R.id.albumName) TextView album;
         @InjectView(R.id.songName) TextView song;
         @InjectView(R.id.songThumbnail) ImageView thumbnail;
         @InjectView(R.id.back) ImageView back;
 
 
-        ViewHolder(View row){
+        public TracksViewHolder(View row){
+            super(row);
             ButterKnife.inject(this, row);
 
         }
@@ -267,12 +272,12 @@ public class TopTracksActivityFragment extends Fragment {
                     myTrackList.add(new MyTrack(track));
                 }
                 if (!grid){
-                    fancyAdapter = new FancyAdapter();
+                    fancyAdapter = new FancyAdapter(myTrackList);
                     songsList.setAdapter(fancyAdapter);
                     fancyAdapter.notifyDataSetChanged();
                 }else{
-                    fancyAdapter = new FancyAdapter();
-                    songsGrid.setAdapter(fancyAdapter);
+                    //fancyAdapter = new FancyAdapter();
+                    //songsGrid.setAdapter(fancyAdapter);
                     fancyAdapter.notifyDataSetChanged();
                 }
 
