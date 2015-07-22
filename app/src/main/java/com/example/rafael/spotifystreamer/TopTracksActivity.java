@@ -17,30 +17,36 @@ import android.widget.ImageView;
 import com.squareup.picasso.Callback;
 import com.squareup.picasso.Picasso;
 
+import butterknife.ButterKnife;
+import butterknife.InjectView;
+import kaaes.spotify.webapi.android.models.Image;
+
 
 public class TopTracksActivity extends AppCompatActivity {
 
-    private CollapsingToolbarLayout collapsingToolbarLayout;
     private static final String EXTRA_IMAGE = "com.example.rafael.spotifystreamer.extraImage";
     private static final String EXTRA_TITLE = "com.example.rafael.spotifystreamer.extraTitle";
+    @InjectView(R.id.collapsing_toolbar) CollapsingToolbarLayout collapsingToolbarLayout;
+    @InjectView(R.id.image) ImageView image;
+    @InjectView(R.id.fab) FloatingActionButton fab;
+    @InjectView(R.id.toolbar) Toolbar toolbar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_top_tracks);
+        ButterKnife.inject(this);
 
         ViewCompat.setTransitionName(findViewById(R.id.app_bar_layout), EXTRA_IMAGE);
         supportPostponeEnterTransition();
 
-        setSupportActionBar((Toolbar) findViewById(R.id.toolbar));
+        setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         String itemTitle = getIntent().getStringExtra(EXTRA_TITLE);
-        collapsingToolbarLayout = (CollapsingToolbarLayout)findViewById(R.id.collapsing_toolbar);
         collapsingToolbarLayout.setTitle(itemTitle);
         collapsingToolbarLayout.setExpandedTitleColor(getResources().getColor(android.R.color.transparent));
 
-        final ImageView image = (ImageView)findViewById(R.id.image);
         Picasso.with(this).load(getIntent().getStringExtra(EXTRA_IMAGE)).into(image, new Callback() {
 
             @Override
@@ -68,7 +74,7 @@ public class TopTracksActivity extends AppCompatActivity {
         int primary = getResources().getColor(R.color.primary);
         collapsingToolbarLayout.setContentScrimColor(palette.getMutedColor(primary));
         collapsingToolbarLayout.setStatusBarScrimColor(palette.getMutedColor(primary_dark));
-        updateBackground((FloatingActionButton) findViewById(R.id.fab), palette);
+        updateBackground(fab, palette);
         supportPostponeEnterTransition();
 
     }

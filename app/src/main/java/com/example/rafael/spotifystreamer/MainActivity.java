@@ -24,6 +24,8 @@ public class MainActivity extends AppCompatActivity implements SpotifySearchFrag
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        initToolbar();
+
 
         if (findViewById(R.id.songs_detail_container) != null) {
             // The detail container view will be present only in the large-screen layouts
@@ -43,7 +45,7 @@ public class MainActivity extends AppCompatActivity implements SpotifySearchFrag
         } else {
             mTwoPane = false;
         }
-        SpotifySearchFragment forecastFragment =  ((SpotifySearchFragment)getSupportFragmentManager()
+        SpotifySearchFragment searchFragment =  ((SpotifySearchFragment)getSupportFragmentManager()
                 .findFragmentById(R.id.fragment));
 
     }
@@ -53,9 +55,10 @@ public class MainActivity extends AppCompatActivity implements SpotifySearchFrag
         setSupportActionBar(toolbar);
 
         final ActionBar actionBar = getSupportActionBar();
+        toolbar.setTitleTextColor(getResources().getColor(R.color.actionBarText));
 
         if (actionBar != null){
-            actionBar.setDisplayHomeAsUpEnabled(true);
+            actionBar.setDisplayHomeAsUpEnabled(false);
         }
     }
 

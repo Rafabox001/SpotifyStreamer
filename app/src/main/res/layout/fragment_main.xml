@@ -4,23 +4,46 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:background="@color/back"
+    android:background="@color/primary_ligth"
     android:paddingLeft="5dp"
     android:paddingRight="5dp"
     tools:context=".MainActivityFragment">
 
-    <android.support.v7.widget.SearchView
+    <android.support.v7.widget.CardView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:inputType="text"
-        app:iconifiedByDefault="false"
-        app:queryHint="@string/hint"
-        android:id="@+id/search_artist"/>
+        app:cardBackgroundColor="@color/back"
+        android:layout_marginTop="5dp"
+        android:foreground="@drawable/touch_selector_song"
+        app:cardElevation="@dimen/elevation_low"
+        app:cardUseCompatPadding="false">
 
-    <ListView
-        android:id="@+id/spotify_search_list"
+        <android.support.v7.widget.SearchView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="text"
+            app:iconifiedByDefault="false"
+            app:queryHint="@string/hint"
+            android:id="@+id/search_artist"/>
+
+    </android.support.v7.widget.CardView>
+
+    <android.support.v7.widget.CardView
+        android:clickable="true"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:choiceMode="singleChoice"/>
+        android:foreground="?android:attr/selectableItemBackground"
+        app:cardElevation="@dimen/elevation_high"
+        app:cardBackgroundColor="@color/back"
+        app:cardUseCompatPadding="false">
+
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/spotify_search_list"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:choiceMode="singleChoice"/>
+
+    </android.support.v7.widget.CardView>
+
 
 </LinearLayout>

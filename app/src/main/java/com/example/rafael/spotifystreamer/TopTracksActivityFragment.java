@@ -1,31 +1,19 @@
 package com.example.rafael.spotifystreamer;
 
 import android.content.Intent;
-import android.graphics.PorterDuff;
-import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.os.Parcelable;
-import android.preference.PreferenceActivity;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
 import android.support.v4.app.NavUtils;
-import android.support.v7.app.ActionBarActivity;
+import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.text.Editable;
-import android.text.TextWatcher;
-import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
-import android.widget.EditText;
-import android.widget.GridView;
 import android.widget.ImageView;
-import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -41,12 +29,8 @@ import butterknife.ButterKnife;
 import butterknife.InjectView;
 import kaaes.spotify.webapi.android.SpotifyApi;
 import kaaes.spotify.webapi.android.SpotifyService;
-import kaaes.spotify.webapi.android.models.Artist;
-import kaaes.spotify.webapi.android.models.ArtistsPager;
-import kaaes.spotify.webapi.android.models.Image;
 import kaaes.spotify.webapi.android.models.Track;
 import kaaes.spotify.webapi.android.models.Tracks;
-import kaaes.spotify.webapi.android.models.TracksPager;
 import retrofit.RetrofitError;
 
 
@@ -56,12 +40,10 @@ import retrofit.RetrofitError;
 public class TopTracksActivityFragment extends Fragment {
 
     @InjectView(R.id.songsList) RecyclerView songsList;
-    @InjectView(R.id.songsGrid) GridView songsGrid;
     private List<MyTrack> myTrackList;
     private FancyAdapter fancyAdapter;
     private String mId;
     private String recoveredId = "";
-    private Boolean grid = false;
 
     public TopTracksActivityFragment() {
     }
@@ -69,7 +51,7 @@ public class TopTracksActivityFragment extends Fragment {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
-        switch(item.getItemId()) {
+        switch(id) {
             case android.R.id.home:
                 NavUtils.navigateUpFromSameTask(getActivity());
                 break;
@@ -86,43 +68,29 @@ public class TopTracksActivityFragment extends Fragment {
         //We get the intent of the previous activity to retrieve the id we´ll use to search the tracks
         Bundle arguments = getArguments();
         songsList.setHasFixedSize(true);
-        LinearLayoutManager llm = new LinearLayoutManager(getActivity());
-        llm.setOrientation(LinearLayoutManager.VERTICAL);
-        songsList.setLayoutManager(llm);
+
         if (arguments != null){
             mId = arguments.getString("artistId");
-            grid = true;
-            songsGrid.setVisibility(View.VISIBLE);
-            songsList.setVisibility(View.INVISIBLE);
+            GridLayoutManager glm = new GridLayoutManager(getActivity(), 2);
+            songsList.setLayoutManager(glm);
+
 
         }else{
             Intent intent = getActivity().getIntent();
-            Bundle extra = intent.getExtras();
             mId = intent.getStringExtra(Intent.EXTRA_TEXT);
+            LinearLayoutManager llm = new LinearLayoutManager(getActivity());
+            llm.setOrientation(LinearLayoutManager.VERTICAL);
+            songsList.setLayoutManager(llm);
         }
 
 
-
-
-        final Drawable upArrow = getResources().getDrawable(R.drawable.abc_ic_ab_back_mtrl_am_alpha);
-        upArrow.setColorFilter(getResources().getColor(R.color.actionBarText), PorterDuff.Mode.SRC_ATOP);
-        //((ActionBarActivity) getActivity()).getSupportActionBar().setHomeAsUpIndicator(upArrow);
-        //((ActionBarActivity) getActivity()).getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        //((ActionBarActivity) getActivity()).getSupportActionBar().setSubtitle(extra.getString("artist"));
         if (savedInstanceState != null) {
             myTrackList = savedInstanceState.getParcelableArrayList("tracks");
             recoveredId = savedInstanceState.getString("id");
 
-            if (!grid){
-                fancyAdapter = new FancyAdapter(myTrackList);
-                songsList.setAdapter(fancyAdapter);
-                fancyAdapter.notifyDataSetChanged();
-            }else{
-                //fancyAdapter = new FancyAdapter();
-                //songsGrid.setAdapter(fancyAdapter);
-                fancyAdapter.notifyDataSetChanged();
-            }
-
+            fancyAdapter = new FancyAdapter(myTrackList);
+            songsList.setAdapter(fancyAdapter);
+            fancyAdapter.notifyDataSetChanged();
 
         }
         if (mId!=null){
@@ -150,16 +118,9 @@ public class TopTracksActivityFragment extends Fragment {
             myTrackList = savedInstanceState.getParcelableArrayList("tracks");
             recoveredId = savedInstanceState.getString("id");
 
-            if (!grid){
-                fancyAdapter = new FancyAdapter(myTrackList);
-                songsList.setAdapter(fancyAdapter);
-                fancyAdapter.notifyDataSetChanged();
-            }else{
-                //fancyAdapter = new FancyAdapter();
-                //songsGrid.setAdapter(fancyAdapter);
-                fancyAdapter.notifyDataSetChanged();
-            }
-
+            fancyAdapter = new FancyAdapter(myTrackList);
+            songsList.setAdapter(fancyAdapter);
+            fancyAdapter.notifyDataSetChanged();
 
         }
     }
@@ -230,7 +191,7 @@ public class TopTracksActivityFragment extends Fragment {
 
     public class retrieveSpotifyData extends AsyncTask<String, Void, Tracks> {
 
-        private final String LOG_TAG = retrieveSpotifyData.class.getSimpleName();
+        //private final String LOG_TAG = retrieveSpotifyData.class.getSimpleName();
 
         @Override
         protected Tracks doInBackground(String... params) {
@@ -264,22 +225,18 @@ public class TopTracksActivityFragment extends Fragment {
 
             if (result != null) {
                 if (myTrackList == null) {
-                    myTrackList = new ArrayList<MyTrack>();
+                    myTrackList = new ArrayList<>();
                 } else {
                     myTrackList.clear();
                 }
                 for(Track track : result.tracks){
                     myTrackList.add(new MyTrack(track));
                 }
-                if (!grid){
-                    fancyAdapter = new FancyAdapter(myTrackList);
-                    songsList.setAdapter(fancyAdapter);
-                    fancyAdapter.notifyDataSetChanged();
-                }else{
-                    //fancyAdapter = new FancyAdapter();
-                    //songsGrid.setAdapter(fancyAdapter);
-                    fancyAdapter.notifyDataSetChanged();
-                }
+
+                fancyAdapter = new FancyAdapter(myTrackList);
+                songsList.setAdapter(fancyAdapter);
+                fancyAdapter.notifyDataSetChanged();
+
 
             }
 
