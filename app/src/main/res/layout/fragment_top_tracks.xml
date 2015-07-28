@@ -5,7 +5,7 @@
     android:paddingRight="5dp"
     android:background="@color/primary_ligth"
     android:orientation="vertical"
-    tools:context="com.example.rafael.spotifystreamer.TopTracksActivityFragment">
+    tools:context="com.example.rafael.spotifystreamer.fragments.TopTracksActivityFragment">
 
     <android.support.v7.widget.RecyclerView
         android:id="@+id/songsList"

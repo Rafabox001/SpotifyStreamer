@@ -24,7 +24,7 @@
 
         <fragment
             android:id="@+id/fragment"
-            android:name="com.example.rafael.spotifystreamer.SpotifySearchFragment"
+            android:name="com.example.rafael.spotifystreamer.fragments.SpotifySearchFragment"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="2"

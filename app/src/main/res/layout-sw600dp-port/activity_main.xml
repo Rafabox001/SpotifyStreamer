@@ -14,7 +14,7 @@
 
     <fragment  android:id="@+id/fragment"
         android:layout_below="@+id/toolbar"
-        android:name="com.example.rafael.spotifystreamer.SpotifySearchFragment"
+        android:name="com.example.rafael.spotifystreamer.fragments.SpotifySearchFragment"
         tools:layout="@layout/fragment_main" android:layout_width="match_parent"
         android:layout_height="match_parent" />
 

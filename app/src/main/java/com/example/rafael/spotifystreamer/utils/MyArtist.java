@@ -1,22 +1,18 @@
-package com.example.rafael.spotifystreamer;
+package com.example.rafael.spotifystreamer.utils;
 
 import android.os.Parcel;
 import android.os.Parcelable;
 
-import java.util.List;
-
 import kaaes.spotify.webapi.android.models.Artist;
-import kaaes.spotify.webapi.android.models.Followers;
-import kaaes.spotify.webapi.android.models.Image;
 
 /**
  * Created by Developer-I on 18/06/2015.
  */
 public class MyArtist extends Artist implements Parcelable{
-    String artistName;
-    String artistId;
-    String artistImage;
-    String backImage;
+    public String artistName;
+    public String artistId;
+    public String artistImage;
+    public String backImage;
 
     public MyArtist(Artist artist) {
         artistName = artist.name;

@@ -1,14 +1,16 @@
-package com.example.rafael.spotifystreamer;
+package com.example.rafael.spotifystreamer.fragments;
 
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Parcelable;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v4.app.NavUtils;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
@@ -17,6 +19,11 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.rafael.spotifystreamer.R;
+import com.example.rafael.spotifystreamer.TopTracksActivity;
+import com.example.rafael.spotifystreamer.fragments.MediaPlayerFragment;
+import com.example.rafael.spotifystreamer.utils.MyTrack;
+import com.example.rafael.spotifystreamer.utils.RecyclerItemClickListener;
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
@@ -40,9 +47,10 @@ import retrofit.RetrofitError;
 public class TopTracksActivityFragment extends Fragment {
 
     @InjectView(R.id.songsList) RecyclerView songsList;
-    private List<MyTrack> myTrackList;
+    private ArrayList<MyTrack> myTrackList;
     private FancyAdapter fancyAdapter;
     private String mId;
+    private String mArtist;
     private String recoveredId = "";
 
     public TopTracksActivityFragment() {
@@ -65,12 +73,13 @@ public class TopTracksActivityFragment extends Fragment {
         View rootView = inflater.inflate(R.layout.fragment_top_tracks, container, false);
         ButterKnife.inject(this, rootView);
 
-        //We get the intent of the previous activity to retrieve the id we´ll use to search the tracks
+        //We get the intent of the previous activity to retrieve the id well use to search the tracks
         Bundle arguments = getArguments();
         songsList.setHasFixedSize(true);
 
         if (arguments != null){
             mId = arguments.getString("artistId");
+            mArtist = arguments.getString("artist");
             GridLayoutManager glm = new GridLayoutManager(getActivity(), 2);
             songsList.setLayoutManager(glm);
 
@@ -78,6 +87,7 @@ public class TopTracksActivityFragment extends Fragment {
         }else{
             Intent intent = getActivity().getIntent();
             mId = intent.getStringExtra(Intent.EXTRA_TEXT);
+            mArtist = intent.getStringExtra(Intent.EXTRA_TITLE);
             LinearLayoutManager llm = new LinearLayoutManager(getActivity());
             llm.setOrientation(LinearLayoutManager.VERTICAL);
             songsList.setLayoutManager(llm);
@@ -99,6 +109,17 @@ public class TopTracksActivityFragment extends Fragment {
             }
         }
 
+        songsList.addOnItemTouchListener(
+                new RecyclerItemClickListener(getActivity(), new RecyclerItemClickListener.OnItemClickListener() {
+                    @Override
+                    public void onItemClick(View view, int position) {
+                        Log.d("songsListener", String.valueOf(position));
+                        ((TopTracksActivity)getActivity()).collapseToolbar();
+                        navigateToPlayer(position);
+
+                    }
+                })
+        );
 
 
         return rootView;
@@ -125,6 +146,25 @@ public class TopTracksActivityFragment extends Fragment {
         }
     }
 
+    public void navigateToPlayer(int position){
+        Bundle args = new Bundle();
+        args.putParcelableArrayList("tracks", myTrackList);
+        args.putInt("position", position);
+        args.putString("artist", mArtist);
+
+
+
+        MediaPlayerFragment mediaPlayerFragment = new MediaPlayerFragment();
+        mediaPlayerFragment.setArguments(args);
+        FragmentTransaction transaction = getFragmentManager().beginTransaction();
+
+        transaction.replace(R.id.fragment_songs_container, mediaPlayerFragment);
+        transaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
+        transaction.addToBackStack(null);
+        transaction.commit();
+
+    }
+
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
@@ -141,7 +181,7 @@ public class TopTracksActivityFragment extends Fragment {
 
         @Override
         public int getItemCount() {
-            return trackList.size();
+            return (trackList == null)?0:trackList.size();
         }
 
         @Override
@@ -196,7 +236,7 @@ public class TopTracksActivityFragment extends Fragment {
         @Override
         protected Tracks doInBackground(String... params) {
 
-            // We pass the filter text and call spotify wrapper API to get the artist´s
+            // We pass the filter text and call spotify wrapper API to get the artists
             Tracks tracks = null;
 
             try{
@@ -221,7 +261,7 @@ public class TopTracksActivityFragment extends Fragment {
         protected void onPostExecute(Tracks result) {
             super.onPostExecute(result);
 
-            //We dd the results to a list and call the adapter so the view get´s updated
+            //We dd the results to a list and call the adapter so the view gets updated
 
             if (result != null) {
                 if (myTrackList == null) {
