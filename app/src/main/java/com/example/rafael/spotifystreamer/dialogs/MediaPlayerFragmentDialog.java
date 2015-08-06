@@ -12,6 +12,7 @@ import android.media.session.MediaSession;
 import android.media.session.MediaSessionManager;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.IBinder;
 import android.support.annotation.NonNull;
 import android.support.v4.app.DialogFragment;
@@ -26,6 +27,7 @@ import android.view.Window;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.MediaController.MediaPlayerControl;
+import android.widget.SeekBar;
 import android.widget.TextView;
 
 import com.example.rafael.spotifystreamer.R;
@@ -52,6 +54,9 @@ public class MediaPlayerFragmentDialog extends DialogFragment implements MediaPl
     @InjectView(R.id.trackName)TextView trackName;
     @InjectView(R.id.backgroundImage)ImageView backImage;
     @InjectView(R.id.trackImage)ImageView trackImage;
+    @InjectView(R.id.currentDuration)TextView currentDuration;
+    @InjectView(R.id.finalDuration)TextView finalDuration;
+    @InjectView(R.id.seekBar)SeekBar seekBar;
 
     private MusicService musicService;
     private Intent playIntent;
@@ -82,6 +87,8 @@ public class MediaPlayerFragmentDialog extends DialogFragment implements MediaPl
 
     private OnFragmentInteractionListener mListener;
 
+    private Handler seekHandler = new Handler();
+
     private static final int NOTIFY_ID = 1;
 
 
@@ -108,6 +115,8 @@ public class MediaPlayerFragmentDialog extends DialogFragment implements MediaPl
             public void onReceive(Context context, Intent intent) {
                 int pos = intent.getIntExtra("position", 0);
                 updateUI(pos);
+                seekHandler.removeCallbacks(run);
+                setSeekBar();
             }
         };
 
@@ -122,8 +131,6 @@ public class MediaPlayerFragmentDialog extends DialogFragment implements MediaPl
         // Inflate the layout for this fragment
         View rootView = inflater.inflate(R.layout.fragment_media_player, container, false);
         ButterKnife.inject(this, rootView);
-
-        updateUI(mPosition);
 
         musicConnection = new ServiceConnection() {
             @Override
@@ -145,6 +152,28 @@ public class MediaPlayerFragmentDialog extends DialogFragment implements MediaPl
                 musicBound = false;
             }
         };
+
+        seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                if (fromUser) {
+                    musicService.seek(progress);
+                }
+
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+
+            }
+        });
+
+        updateUI(mPosition);
 
 
         return rootView;
@@ -184,6 +213,37 @@ public class MediaPlayerFragmentDialog extends DialogFragment implements MediaPl
 
 
     }
+
+    // set up seek bar properties and also update current and max duration
+    private void setSeekBar() {
+        int secondsDuration = (musicService.getDur()/1000)%60;
+        int secondsPlayed = (musicService.getPos()/1000)%60;
+        finalDuration.setText("00:" + String.valueOf(secondsDuration));
+        if (secondsPlayed < 10){
+            currentDuration.setText("00:0" + String.valueOf(secondsPlayed));
+        }else{
+            currentDuration.setText("00:" + String.valueOf(secondsPlayed));
+        }
+
+
+        seekBar.setMax(musicService.getDur());
+        Log.d("currentPos", String.valueOf(secondsPlayed));
+
+        seekBar.setProgress(musicService.getPos());
+
+
+
+        // ping for updated position every second
+        seekHandler.postDelayed(run, 1000);
+    }
+
+    // seperate thread for pinging seekbar position
+    Runnable run = new Runnable() {
+        @Override
+        public void run() {
+            setSeekBar();
+        }
+    };
 
     @OnClick(R.id.playButton)
     public void playMusic(){

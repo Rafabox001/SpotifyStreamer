@@ -20,6 +20,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.rafael.spotifystreamer.MainActivity;
 import com.example.rafael.spotifystreamer.R;
 import com.example.rafael.spotifystreamer.TopTracksActivity;
 import com.example.rafael.spotifystreamer.dialogs.MediaPlayerFragmentDialog;
@@ -54,6 +55,7 @@ public class TopTracksActivityFragment extends Fragment {
     private String mId;
     private String mArtist;
     private String recoveredId = "";
+    private Boolean mTwoPane = false;
 
     public TopTracksActivityFragment() {
     }
@@ -82,6 +84,7 @@ public class TopTracksActivityFragment extends Fragment {
         if (arguments != null){
             mId = arguments.getString("artistId");
             mArtist = arguments.getString("artist");
+            mTwoPane = arguments.getBoolean("mTwoPane");
             GridLayoutManager glm = new GridLayoutManager(getActivity(), 2);
             songsList.setLayoutManager(glm);
 
@@ -90,13 +93,15 @@ public class TopTracksActivityFragment extends Fragment {
             Intent intent = getActivity().getIntent();
             mId = intent.getStringExtra(Intent.EXTRA_TEXT);
             mArtist = intent.getStringExtra(Intent.EXTRA_TITLE);
+            mTwoPane = intent.getBooleanExtra("mTwoPane", false);
             LinearLayoutManager llm = new LinearLayoutManager(getActivity());
             llm.setOrientation(LinearLayoutManager.VERTICAL);
             songsList.setLayoutManager(llm);
         }
 
-
+        Log.d("OnCreateView", String.valueOf(savedInstanceState != null));
         if (savedInstanceState != null) {
+
             myTrackList = savedInstanceState.getParcelableArrayList("tracks");
             recoveredId = savedInstanceState.getString("id");
 
@@ -116,7 +121,9 @@ public class TopTracksActivityFragment extends Fragment {
                     @Override
                     public void onItemClick(View view, int position) {
                         Log.d("songsListener", String.valueOf(position));
-                        ((TopTracksActivity)getActivity()).collapseToolbar();
+                        if (!mTwoPane){
+                            ((TopTracksActivity)getActivity()).collapseToolbar();
+                        }
                         navigateToPlayer(position);
 
                     }
@@ -127,6 +134,8 @@ public class TopTracksActivityFragment extends Fragment {
         return rootView;
     }
 
+
+
     private void getTracks(String id) {
         retrieveSpotifyData songsTask = new retrieveSpotifyData();
         songsTask.execute(id);
@@ -135,7 +144,7 @@ public class TopTracksActivityFragment extends Fragment {
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-
+        Log.d("OnActivityCreated", String.valueOf(savedInstanceState != null));
         // get saved datasource if present
         if (savedInstanceState != null) {
             myTrackList = savedInstanceState.getParcelableArrayList("tracks");
@@ -154,16 +163,20 @@ public class TopTracksActivityFragment extends Fragment {
         args.putInt("position", position);
         args.putString("artist", mArtist);
 
+        if (mTwoPane){
+            showNoticeDialog(args);
+        }else{
+            MediaPlayerFragment mediaPlayerFragment = new MediaPlayerFragment();
+            mediaPlayerFragment.setArguments(args);
+            FragmentTransaction transaction = getFragmentManager().beginTransaction();
 
-        showNoticeDialog(args);
-        /*MediaPlayerFragment mediaPlayerFragment = new MediaPlayerFragment();
-        mediaPlayerFragment.setArguments(args);
-        FragmentTransaction transaction = getFragmentManager().beginTransaction();
+            transaction.replace(R.id.fragment_songs_container, mediaPlayerFragment, TopTracksActivity.TAG_MEDIAPLAYER_FRAGMENT);
+            transaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
+            transaction.addToBackStack(TopTracksActivity.TAG_MEDIAPLAYER_FRAGMENT);
+            transaction.commit();
+        }
 
-        transaction.replace(R.id.fragment_songs_container, mediaPlayerFragment, TopTracksActivity.TAG_MEDIAPLAYER_FRAGMENT);
-        transaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
-        transaction.addToBackStack(TopTracksActivity.TAG_MEDIAPLAYER_FRAGMENT);
-        transaction.commit();*/
+
 
     }
 
@@ -179,6 +192,23 @@ public class TopTracksActivityFragment extends Fragment {
         super.onSaveInstanceState(outState);
         outState.putParcelableArrayList("tracks", (ArrayList<? extends Parcelable>) myTrackList);
         outState.putString("id", mId);
+        Log.d("Onsavedinstance", String.valueOf(outState != null));
+    }
+
+    @Override
+    public void onViewStateRestored(Bundle savedInstanceState) {
+        // get saved datasource if present
+        Log.d("OnViewStateRestored", String.valueOf(savedInstanceState != null));
+
+        if (savedInstanceState != null) {
+            myTrackList = savedInstanceState.getParcelableArrayList("tracks");
+            recoveredId = savedInstanceState.getString("id");
+
+            fancyAdapter = new FancyAdapter(myTrackList);
+            songsList.setAdapter(fancyAdapter);
+            fancyAdapter.notifyDataSetChanged();
+        }
+        super.onViewStateRestored(savedInstanceState);
     }
 
     public class FancyAdapter extends RecyclerView.Adapter<TracksViewHolder> {

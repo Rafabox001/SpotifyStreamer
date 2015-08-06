@@ -18,7 +18,7 @@ public class MainActivity extends AppCompatActivity implements SpotifySearchFrag
     private static final String EXTRA_IMAGE = "com.example.rafael.spotifystreamer.extraImage";
     private static final String EXTRA_TITLE = "com.example.rafael.spotifystreamer.extraTitle";
 
-    private Boolean mTwoPane;
+    public Boolean mTwoPane = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,13 +43,17 @@ public class MainActivity extends AppCompatActivity implements SpotifySearchFrag
             }
 
 
+
+
         } else {
             mTwoPane = false;
         }
         SpotifySearchFragment searchFragment =  ((SpotifySearchFragment)getSupportFragmentManager()
                 .findFragmentById(R.id.fragment));
+        searchFragment.isTwoPane(mTwoPane);
 
     }
+
 
     private void initToolbar(){
         final Toolbar toolbar = (Toolbar)findViewById(R.id.toolbar);
@@ -73,6 +77,7 @@ public class MainActivity extends AppCompatActivity implements SpotifySearchFrag
             Bundle args = new Bundle();
             args.putString("artist", artistName);
             args.putString("artistId", artistId);
+            args.putBoolean("mTwoPane", mTwoPane);
 
             TopTracksActivityFragment fragment = new TopTracksActivityFragment();
             fragment.setArguments(args);
@@ -88,6 +93,7 @@ public class MainActivity extends AppCompatActivity implements SpotifySearchFrag
             i.putExtra("artist", artistName);
             i.putExtra(EXTRA_TITLE, artistName);
             i.putExtra(EXTRA_IMAGE, artistArt);
+            i.putExtra("mTwoPane", mTwoPane);
             startActivity(i);
         }
 

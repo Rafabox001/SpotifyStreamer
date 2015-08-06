@@ -461,7 +461,7 @@ public class MusicService extends Service implements MediaPlayer.OnPreparedListe
 
     @Override
     public void onCompletion(MediaPlayer mp) {
-        sendResult(songPosition+1);
+
         mp.reset();
         playNext();
 
@@ -474,6 +474,7 @@ public class MusicService extends Service implements MediaPlayer.OnPreparedListe
 
     @Override
     public void onPrepared(MediaPlayer mp) {
+        sendResult(songPosition);
         mp.start();
 
         new sendNotification(getApplicationContext()).execute(myTrackList.get(songPosition).getTrackBackImage());
@@ -495,7 +496,7 @@ public class MusicService extends Service implements MediaPlayer.OnPreparedListe
 
 
         android.support.v4.app.NotificationCompat.Builder noti = new NotificationCompat.Builder(this)
-                .setSmallIcon(R.drawable.ichigo)
+                .setSmallIcon(R.mipmap.ic_launcher)
                 .setContentTitle("Now playing...")
                 .setContentText(myTrackList.get(songPosition).getTrackName())
                 .setPriority(Notification.PRIORITY_MAX)

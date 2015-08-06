@@ -14,14 +14,22 @@ public class MyTrack extends Track implements Parcelable {
     public String trackImage;
     public String trackBackImage;
     public String previewUrl;
+    public String trackDuration;
+    public String trackUrl;
 
-    public MyTrack(String trackName, String trackAlbum, String trackImage, String trackBackImage, String previewUrl){
+
+    public MyTrack(String trackName, String trackAlbum, String trackImage, String trackBackImage, String previewUrl, String trackDuration, String trackUrl){
         super();
         this.trackName = trackName;
         this.trackAlbum = trackAlbum;
         this.trackImage = trackImage;
         this.trackBackImage = trackBackImage;
         this.previewUrl = previewUrl;
+        this.trackDuration = trackDuration;
+        this.trackUrl = trackUrl;
+
+
+
     }
 
     public MyTrack(){}
@@ -66,6 +74,22 @@ public class MyTrack extends Track implements Parcelable {
         this.previewUrl = previewUrl;
     }
 
+    public String getTrackDuration() {
+        return trackDuration;
+    }
+
+    public void setTrackDuration(String trackDuration) {
+        this.trackDuration = trackDuration;
+    }
+
+    public String getTrackUrl() {
+        return trackUrl;
+    }
+
+    public void setTrackUrl(String trackUrl) {
+        this.trackUrl = trackUrl;
+    }
+
     public MyTrack(Track track) {
         trackName = track.name;
         trackAlbum = track.album.name;
@@ -75,6 +99,8 @@ public class MyTrack extends Track implements Parcelable {
             trackImage = track.album.images.get(sizeOfList - 1).url;
             trackBackImage = track.album.images.get(1).url;
         }
+        this.trackDuration = String.valueOf(track.duration_ms);
+        this.trackUrl = track.uri;
     }
 
     @Override
@@ -89,6 +115,8 @@ public class MyTrack extends Track implements Parcelable {
         dest.writeString(trackImage);
         dest.writeString(trackBackImage);
         dest.writeString(previewUrl);
+        dest.writeString(trackDuration);
+        dest.writeString(trackUrl);
     }
 
     public static final Parcelable.Creator<MyTrack> CREATOR
@@ -113,6 +141,8 @@ public class MyTrack extends Track implements Parcelable {
         trackImage = in.readString();
         trackBackImage = in.readString();
         previewUrl = in.readString();
+        trackDuration = in.readString();
+        trackUrl = in.readString();
     }
 
 

@@ -26,7 +26,7 @@ public class MyTrackList extends ArrayList<MyTrack> implements Parcelable {
         int size = in.readInt();
 
         for (int i = 0; i < size; i++) {
-            MyTrack track = new MyTrack(in.readString(), in.readString(), in.readString(), in.readString(), in.readString());
+            MyTrack track = new MyTrack(in.readString(), in.readString(), in.readString(), in.readString(), in.readString(), in.readString(), in.readString());
             this.add(track);
         }
     }
@@ -61,6 +61,8 @@ public class MyTrackList extends ArrayList<MyTrack> implements Parcelable {
             dest.writeString(track.getTrackImage());
             dest.writeString(track.getTrackBackImage());
             dest.writeString(track.getPreviewUrl());
+            dest.writeString(track.getTrackDuration());
+            dest.writeString(track.getTrackUrl());
         }
     }
 }

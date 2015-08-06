@@ -45,6 +45,7 @@ public class SpotifySearchFragment extends Fragment {
     private List<MyArtist> storedList;
     private FancyAdapter fancyAdapter;
     private String recoveredFilter = "";
+    private Boolean mTwoPane;
 
     private AnimationSet set;
     private LayoutAnimationController controller;
@@ -130,6 +131,10 @@ public class SpotifySearchFragment extends Fragment {
         }
 
         return rootView;
+    }
+
+    public void isTwoPane(Boolean twoPane){
+        mTwoPane = twoPane;
     }
 
 

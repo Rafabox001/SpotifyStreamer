@@ -80,11 +80,16 @@ public class TopTracksActivity extends AppCompatActivity implements MediaPlayerF
 
         //Glide.with(this).load(URL_GIF).asGif().placeholder(R.drawable.music).crossFade().into(fab);
 
+        if (savedInstanceState == null){
+            getSupportFragmentManager().beginTransaction()
+                    .add(R.id.fragment_songs_container, new TopTracksActivityFragment(), TAG_TOP_FRAGMENT)
+                    .addToBackStack(TAG_TOP_FRAGMENT)
+                    .commit();
+        }else{
+            TopTracksActivityFragment topTracksActivityFragment =  ((TopTracksActivityFragment)getSupportFragmentManager()
+                    .findFragmentByTag(TAG_TOP_FRAGMENT));
+        }
 
-        getSupportFragmentManager().beginTransaction()
-                .add(R.id.fragment_songs_container, new TopTracksActivityFragment(), TAG_TOP_FRAGMENT)
-                .addToBackStack(TAG_TOP_FRAGMENT)
-                .commit();
 
         appBarLayout.setOnStateChangeListener(new ControllableAppBarLayout.OnStateChangeListener() {
             @Override
