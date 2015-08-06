@@ -3,6 +3,7 @@ package com.example.rafael.spotifystreamer.fragments;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Parcelable;
+import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
 import android.support.v4.app.FragmentTransaction;
@@ -21,6 +22,7 @@ import android.widget.Toast;
 
 import com.example.rafael.spotifystreamer.R;
 import com.example.rafael.spotifystreamer.TopTracksActivity;
+import com.example.rafael.spotifystreamer.dialogs.MediaPlayerFragmentDialog;
 import com.example.rafael.spotifystreamer.fragments.MediaPlayerFragment;
 import com.example.rafael.spotifystreamer.utils.MyTrack;
 import com.example.rafael.spotifystreamer.utils.RecyclerItemClickListener;
@@ -153,16 +155,23 @@ public class TopTracksActivityFragment extends Fragment {
         args.putString("artist", mArtist);
 
 
-
-        MediaPlayerFragment mediaPlayerFragment = new MediaPlayerFragment();
+        showNoticeDialog(args);
+        /*MediaPlayerFragment mediaPlayerFragment = new MediaPlayerFragment();
         mediaPlayerFragment.setArguments(args);
         FragmentTransaction transaction = getFragmentManager().beginTransaction();
 
-        transaction.replace(R.id.fragment_songs_container, mediaPlayerFragment);
+        transaction.replace(R.id.fragment_songs_container, mediaPlayerFragment, TopTracksActivity.TAG_MEDIAPLAYER_FRAGMENT);
         transaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
-        transaction.addToBackStack(null);
-        transaction.commit();
+        transaction.addToBackStack(TopTracksActivity.TAG_MEDIAPLAYER_FRAGMENT);
+        transaction.commit();*/
 
+    }
+
+    public void showNoticeDialog(Bundle args) {
+        // Create an instance of the dialog fragment and show it
+        DialogFragment dialog = new MediaPlayerFragmentDialog();
+        dialog.setArguments(args);
+        dialog.show(getActivity().getSupportFragmentManager(), TopTracksActivity.TAG_MEDIAPLAYER_FRAGMENT);
     }
 
     @Override

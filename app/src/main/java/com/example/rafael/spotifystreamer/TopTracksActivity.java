@@ -17,6 +17,7 @@ import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 
+import com.bumptech.glide.Glide;
 import com.example.rafael.spotifystreamer.fragments.MediaPlayerFragment;
 import com.example.rafael.spotifystreamer.fragments.TopTracksActivityFragment;
 import com.example.rafael.spotifystreamer.utils.ControllableAppBarLayout;
@@ -34,15 +35,13 @@ public class TopTracksActivity extends AppCompatActivity implements MediaPlayerF
     @InjectView(R.id.collapsing_toolbar) CollapsingToolbarLayout collapsingToolbarLayout;
     @InjectView(R.id.app_bar_layout) ControllableAppBarLayout appBarLayout;
     @InjectView(R.id.image) ImageView image;
-    @InjectView(R.id.fab) FloatingActionButton fab;
     @InjectView(R.id.toolbar) Toolbar toolbar;
     @InjectView(R.id.fragment_songs_container) FrameLayout container;
 
-    private static final String DETAILFRAGMENT_TAG = "DFTAG";
-    public static final String ACTION_PLAY = "action_play";
-    public static final String ACTION_PAUSE = "action_pause";
-    public static final String ACTION_PREVIOUS = "action_prev";
-    public static final String ACTION_NEXT = "action_next";
+    public static final String URL_GIF = "http://www.picgifs.com/mini-graphics/mini-graphics/music/mini-graphics-music-124435.gif";
+
+    public static final String TAG_TOP_FRAGMENT = "TopTracksActivityFragment";
+    public static final String TAG_MEDIAPLAYER_FRAGMENT = "TopTracksActivityFragment";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -77,12 +76,14 @@ public class TopTracksActivity extends AppCompatActivity implements MediaPlayerF
             @Override
             public void onError() {
 
-            }
-        });
+            }        });
+
+        //Glide.with(this).load(URL_GIF).asGif().placeholder(R.drawable.music).crossFade().into(fab);
 
 
         getSupportFragmentManager().beginTransaction()
-                .add(R.id.fragment_songs_container, new TopTracksActivityFragment())
+                .add(R.id.fragment_songs_container, new TopTracksActivityFragment(), TAG_TOP_FRAGMENT)
+                .addToBackStack(TAG_TOP_FRAGMENT)
                 .commit();
 
         appBarLayout.setOnStateChangeListener(new ControllableAppBarLayout.OnStateChangeListener() {
@@ -92,9 +93,6 @@ public class TopTracksActivity extends AppCompatActivity implements MediaPlayerF
                     case COLLAPSED:
                         break;
                     case EXPANDED:
-                        if (fab.getVisibility() == View.GONE){
-                            fab.setVisibility(View.VISIBLE);
-                        }
                         break;
                     case IDLE: // Just fired once between switching states
                         break;
@@ -120,7 +118,7 @@ public class TopTracksActivity extends AppCompatActivity implements MediaPlayerF
     public void collapseToolbar(){
         if (appBarLayout.getState() != ControllableAppBarLayout.State.COLLAPSED){
             appBarLayout.collapseToolbar(true);
-            fab.setVisibility(View.GONE);
+            //fab.setVisibility(View.GONE);
         }
     }
 
@@ -129,7 +127,7 @@ public class TopTracksActivity extends AppCompatActivity implements MediaPlayerF
         int primary = getResources().getColor(R.color.primary);
         collapsingToolbarLayout.setContentScrimColor(palette.getMutedColor(primary));
         collapsingToolbarLayout.setStatusBarScrimColor(palette.getMutedColor(primary_dark));
-        updateBackground(fab, palette);
+        //updateBackground(fab, palette);
         supportPostponeEnterTransition();
 
     }
@@ -149,6 +147,24 @@ public class TopTracksActivity extends AppCompatActivity implements MediaPlayerF
 
     @Override
     public void onFragmentInteraction(Uri uri) {
+
+    }
+
+    @Override
+    public void onBackPressed() {
+        try{
+            MediaPlayerFragment mediaPlayerFragment = (MediaPlayerFragment)getSupportFragmentManager().findFragmentByTag(TAG_MEDIAPLAYER_FRAGMENT);
+            if (mediaPlayerFragment != null && mediaPlayerFragment.isVisible()){
+                super.onBackPressed();
+            }
+        }catch (ClassCastException e){
+            Intent intent = new Intent(this, MainActivity.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+            startActivity(intent);
+        }
+
+
+
 
     }
 

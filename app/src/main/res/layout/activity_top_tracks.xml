@@ -50,16 +50,6 @@
         app:layout_behavior="@string/appbar_scrolling_view_behavior"/>
 
 
-
-
-
-    <android.support.design.widget.FloatingActionButton
-        android:id="@+id/fab"
-        android:visibility="gone"
-        app:layout_anchor="@id/app_bar_layout"
-        app:layout_anchorGravity="bottom|right|end"
-        style="@style/FabStyle"/>
-
 </android.support.design.widget.CoordinatorLayout>
 
 

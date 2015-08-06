@@ -3,6 +3,7 @@ package com.example.rafael.spotifystreamer.utils;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.util.Log;
 import android.view.KeyEvent;
 
 import com.example.rafael.spotifystreamer.services.MusicService;
@@ -13,6 +14,8 @@ import com.example.rafael.spotifystreamer.services.MusicService;
 public class MusicIntentReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
+
+        Log.d("Broadcast action", intent.getAction());
 
         if (intent.getAction().equals(
                 android.media.AudioManager.ACTION_AUDIO_BECOMING_NOISY)) {
@@ -30,7 +33,7 @@ public class MusicIntentReceiver extends BroadcastReceiver {
                     Intent.EXTRA_KEY_EVENT);
             if (keyEvent.getAction() != KeyEvent.ACTION_DOWN)
                 return;
-
+            Log.d("keyCode action", String.valueOf(keyEvent.getKeyCode()));
             switch (keyEvent.getKeyCode()) {
                 case KeyEvent.KEYCODE_HEADSETHOOK:
                 case KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE:

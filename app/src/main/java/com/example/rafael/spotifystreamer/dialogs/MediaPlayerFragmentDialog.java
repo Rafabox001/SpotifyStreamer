@@ -1,6 +1,7 @@
-package com.example.rafael.spotifystreamer.fragments;
+package com.example.rafael.spotifystreamer.dialogs;
 
 import android.app.Activity;
+import android.app.Dialog;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
@@ -11,29 +12,28 @@ import android.media.session.MediaSession;
 import android.media.session.MediaSessionManager;
 import android.net.Uri;
 import android.os.Bundle;
-
 import android.os.IBinder;
-import android.preference.PreferenceManager;
+import android.support.annotation.NonNull;
+import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.LocalBroadcastManager;
+import android.support.v7.app.AlertDialog;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
 import android.widget.Button;
 import android.widget.ImageView;
-import android.widget.MediaController;
+import android.widget.MediaController.MediaPlayerControl;
 import android.widget.TextView;
 
-import com.example.rafael.spotifystreamer.MainActivity;
-import com.example.rafael.spotifystreamer.TopTracksActivity;
-import com.example.rafael.spotifystreamer.utils.MusicController;
-import com.example.rafael.spotifystreamer.utils.MyTrack;
 import com.example.rafael.spotifystreamer.R;
 import com.example.rafael.spotifystreamer.services.MusicService;
 import com.example.rafael.spotifystreamer.services.MusicService.MusicBinder;
+import com.example.rafael.spotifystreamer.utils.MusicController;
+import com.example.rafael.spotifystreamer.utils.MyTrack;
 import com.squareup.picasso.Picasso;
-import android.widget.MediaController.MediaPlayerControl;
 
 import java.util.ArrayList;
 
@@ -42,7 +42,7 @@ import butterknife.InjectView;
 import butterknife.OnClick;
 
 
-public class MediaPlayerFragment extends Fragment implements MediaPlayerControl{
+public class MediaPlayerFragmentDialog extends DialogFragment implements MediaPlayerControl{
     @InjectView(R.id.playButton)Button playButton;
     @InjectView(R.id.nextButton)Button nextButton;
     @InjectView(R.id.prevButton)Button prevButton;
@@ -87,12 +87,13 @@ public class MediaPlayerFragment extends Fragment implements MediaPlayerControl{
 
 
 
-    public MediaPlayerFragment() {
+    public MediaPlayerFragmentDialog() {
         // Required empty public constructor
     }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
+        Log.d("phase", "onCreate");
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
             Bundle bundle = getArguments();
@@ -117,6 +118,7 @@ public class MediaPlayerFragment extends Fragment implements MediaPlayerControl{
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+        Log.d("phase", "onCreateView");
         // Inflate the layout for this fragment
         View rootView = inflater.inflate(R.layout.fragment_media_player, container, false);
         ButterKnife.inject(this, rootView);
@@ -146,6 +148,24 @@ public class MediaPlayerFragment extends Fragment implements MediaPlayerControl{
 
 
         return rootView;
+    }
+
+    @NonNull
+    @Override
+    public Dialog onCreateDialog(Bundle savedInstanceState) {
+        Log.d("phase", "onCreateDialog");
+        /** Here we are creating the dialog that would be shown
+         * in devices with a screen resolution higher than 600dp
+         * we just create the dialog because the view would be inflated
+         * in onCreateView method
+         */
+
+        Dialog dialog = super.onCreateDialog(savedInstanceState);
+        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+
+
+
+        return dialog;
     }
 
     public void updateUI(int position){
@@ -205,6 +225,7 @@ public class MediaPlayerFragment extends Fragment implements MediaPlayerControl{
 
     @Override
     public void onStart() {
+        Log.d("phase", "onStart");
         super.onStart();
         if (playIntent == null){
             playIntent = new Intent(getActivity().getApplicationContext(), MusicService.class);
@@ -266,8 +287,8 @@ public class MediaPlayerFragment extends Fragment implements MediaPlayerControl{
         try {
             mListener = (OnFragmentInteractionListener) activity;
         } catch (ClassCastException e) {
-            throw new ClassCastException(activity.toString()
-                    + " must implement OnFragmentInteractionListener");
+            //throw new ClassCastException(activity.toString()
+              //      + " must implement OnFragmentInteractionListener");
         }
     }
 

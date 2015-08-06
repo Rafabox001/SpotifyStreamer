@@ -5,6 +5,7 @@ import android.support.v7.app.ActionBar;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 
 import com.example.rafael.spotifystreamer.fragments.SpotifySearchFragment;
 import com.example.rafael.spotifystreamer.fragments.TopTracksActivityFragment;
@@ -90,5 +91,14 @@ public class MainActivity extends AppCompatActivity implements SpotifySearchFrag
             startActivity(i);
         }
 
+    }
+
+    @Override
+    public void onBackPressed() {
+        Log.d("back press", "BACK");
+        Intent startMain = new Intent(Intent.ACTION_MAIN);
+        startMain.addCategory(Intent.CATEGORY_HOME);
+        startMain.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        startActivity(startMain);
     }
 }

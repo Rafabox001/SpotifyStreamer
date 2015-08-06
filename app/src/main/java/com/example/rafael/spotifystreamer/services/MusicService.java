@@ -119,6 +119,11 @@ public class MusicService extends Service implements MediaPlayer.OnPreparedListe
                 case ACTION_PREVIOUS:
                     playPrev();
                     break;
+                case STOP_ACTION:
+                    mediaPlayer.stop();
+                    stopForeground(true);
+                    unregisterReceiver(broadcastReceiver);
+                    break;
             }
         }
     };
@@ -126,6 +131,48 @@ public class MusicService extends Service implements MediaPlayer.OnPreparedListe
 
 
     public MusicService() {
+    }
+
+    @Override
+    public int onStartCommand(Intent intent, int flags, int startId) {
+        if (intent != null){
+            final String action = intent.getAction();
+            if (action != null){
+                Log.d("ACTION_SERVICE", action);
+                switch (action){
+                    case ACTION_PLAY:
+                        if (!mediaPlayer.isPlaying()){
+                            continuePlaying();
+                        }else{
+                            pauseSong();
+                        }
+                        break;
+                    case ACTION_TOGGLE_PLAYBACK:
+                        if (!mediaPlayer.isPlaying()){
+                            continuePlaying();
+                        }else{
+                            pauseSong();
+                        }
+                        break;
+                    case ACTION_PAUSE:
+                        pauseSong();
+                        break;
+                    case ACTION_NEXT:
+                        playNext();
+                        break;
+                    case ACTION_PREVIOUS:
+                        playPrev();
+                        break;
+                    case STOP_ACTION:
+                        mediaPlayer.stop();
+                        stopForeground(true);
+                        unregisterReceiver(broadcastReceiver);
+                        break;
+                }
+            }
+
+        }
+        return START_STICKY;
     }
 
     public void onCreate(){
@@ -137,6 +184,7 @@ public class MusicService extends Service implements MediaPlayer.OnPreparedListe
         intentFilter.addAction(ACTION_PLAY);
         intentFilter.addAction(ACTION_NEXT);
         intentFilter.addAction(ACTION_PREVIOUS);
+        intentFilter.addAction(STOP_ACTION);
         registerReceiver(broadcastReceiver, intentFilter);
 
         broadcastManager = LocalBroadcastManager.getInstance(this);
@@ -400,7 +448,7 @@ public class MusicService extends Service implements MediaPlayer.OnPreparedListe
 
     @Override
     public IBinder onBind(Intent intent) {
-        // TODO: Return the communication channel to the service.
+        //Return the communication channel to the service.
         return musicBind;
     }
 
@@ -428,7 +476,7 @@ public class MusicService extends Service implements MediaPlayer.OnPreparedListe
     public void onPrepared(MediaPlayer mp) {
         mp.start();
 
-        new sendNotification(getApplicationContext()).execute(myTrackList.get(songPosition).getTrackImage());
+        new sendNotification(getApplicationContext()).execute(myTrackList.get(songPosition).getTrackBackImage());
 
     }
 
@@ -459,6 +507,7 @@ public class MusicService extends Service implements MediaPlayer.OnPreparedListe
                 .addAction(generateAction(android.R.drawable.ic_media_previous, "Previous", ACTION_PREVIOUS))
                 .addAction(generateAction(android.R.drawable.ic_media_play, "Play", ACTION_PLAY))
                 .addAction(generateAction(android.R.drawable.ic_media_next, "Next", ACTION_NEXT))
+                .addAction(generateAction(android.R.drawable.ic_menu_close_clear_cancel, "Stop", STOP_ACTION))
                 .setWhen(0);
 
 

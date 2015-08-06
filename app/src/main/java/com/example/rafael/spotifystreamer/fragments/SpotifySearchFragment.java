@@ -119,7 +119,15 @@ public class SpotifySearchFragment extends Fragment {
                     }
                 });
 
+        // get saved datasource if present
+        if (savedInstanceState != null) {
+            storedList = savedInstanceState.getParcelableArrayList("artist");
+            recoveredFilter = savedInstanceState.getString("filter");
 
+            fancyAdapter = new FancyAdapter(storedList);
+            spotifyList.setAdapter(fancyAdapter);
+            fancyAdapter.notifyDataSetChanged();
+        }
 
         return rootView;
     }
@@ -131,10 +139,10 @@ public class SpotifySearchFragment extends Fragment {
         spotifyTask.execute(spotifySearch.getQuery().toString());
     }
 
+
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-
         // get saved datasource if present
         if (savedInstanceState != null) {
             storedList = savedInstanceState.getParcelableArrayList("artist");
