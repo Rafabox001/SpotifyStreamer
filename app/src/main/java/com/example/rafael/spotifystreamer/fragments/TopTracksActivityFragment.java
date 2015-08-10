@@ -2,6 +2,7 @@ package com.example.rafael.spotifystreamer.fragments;
 
 import android.content.Intent;
 import android.os.AsyncTask;
+import android.os.Looper;
 import android.os.Parcelable;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
@@ -27,6 +28,7 @@ import com.example.rafael.spotifystreamer.dialogs.MediaPlayerFragmentDialog;
 import com.example.rafael.spotifystreamer.fragments.MediaPlayerFragment;
 import com.example.rafael.spotifystreamer.utils.MyTrack;
 import com.example.rafael.spotifystreamer.utils.RecyclerItemClickListener;
+import com.example.rafael.spotifystreamer.utils.Utility;
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
@@ -272,8 +274,11 @@ public class TopTracksActivityFragment extends Fragment {
 
         //private final String LOG_TAG = retrieveSpotifyData.class.getSimpleName();
 
+
+
         @Override
         protected Tracks doInBackground(String... params) {
+            Looper.prepare();
 
             // We pass the filter text and call spotify wrapper API to get the artists
             Tracks tracks = null;
@@ -283,7 +288,8 @@ public class TopTracksActivityFragment extends Fragment {
                 SpotifyService spotify = api.getService();
                 //We use this map as a country parameter to get the top tracks of the desired artist
                 Map<String, Object> map = new HashMap<>();
-                map.put("country", Locale.getDefault().getCountry());
+                map.put("country", Utility.getPreferredLocation(getActivity()));
+                Log.d("COUNTRY", Utility.getPreferredLocation(getActivity()));
                 tracks = spotify.getArtistTopTrack(params[0], map);
             }catch (RetrofitError e){
                 ToastText(getActivity().getResources().getString(R.string.spotifyError) + " " + e.toString());

@@ -46,6 +46,7 @@ import com.example.rafael.spotifystreamer.fragments.MediaPlayerFragment;
 import com.example.rafael.spotifystreamer.utils.MusicIntentReceiver;
 import com.example.rafael.spotifystreamer.utils.MyTrack;
 import com.example.rafael.spotifystreamer.utils.MyTrackList;
+import com.example.rafael.spotifystreamer.utils.Utility;
 import com.squareup.picasso.Picasso;
 
 import java.io.IOException;
@@ -477,8 +478,10 @@ public class MusicService extends Service implements MediaPlayer.OnPreparedListe
         sendResult(songPosition);
         mp.start();
 
-        new sendNotification(getApplicationContext()).execute(myTrackList.get(songPosition).getTrackBackImage());
-
+        if (Utility.isNotificationEnabled(getApplicationContext())){
+            new sendNotification(getApplicationContext()).execute(myTrackList.get(songPosition).getTrackBackImage());
+        }
+        
     }
 
     public void makeNotification(Bitmap trackImage) {

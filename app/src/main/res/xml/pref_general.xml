@@ -1,0 +1,15 @@
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <ListPreference
+        android:key="@string/pref_location_key"
+        android:title="@string/pref_country_code"
+        android:defaultValue="US"
+        android:icon="@mipmap/ic_launcher"
+        android:entries="@array/pref_country_code_titles"
+        android:entryValues="@array/pref_country_code_values"
+        android:negativeButtonText="@null"
+        android:positiveButtonText="@null" />
+
+
+
+</PreferenceScreen>
