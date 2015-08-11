@@ -26,6 +26,7 @@ import com.example.rafael.spotifystreamer.R;
 import com.example.rafael.spotifystreamer.TopTracksActivity;
 import com.example.rafael.spotifystreamer.dialogs.MediaPlayerFragmentDialog;
 import com.example.rafael.spotifystreamer.fragments.MediaPlayerFragment;
+import com.example.rafael.spotifystreamer.interfaces.OnTaskError;
 import com.example.rafael.spotifystreamer.utils.MyTrack;
 import com.example.rafael.spotifystreamer.utils.RecyclerItemClickListener;
 import com.example.rafael.spotifystreamer.utils.Utility;
@@ -49,7 +50,7 @@ import retrofit.RetrofitError;
 /**
  * A placeholder fragment containing a simple view.
  */
-public class TopTracksActivityFragment extends Fragment {
+public class TopTracksActivityFragment extends Fragment implements OnTaskError{
 
     @InjectView(R.id.songsList) RecyclerView songsList;
     private ArrayList<MyTrack> myTrackList;
@@ -213,6 +214,11 @@ public class TopTracksActivityFragment extends Fragment {
         super.onViewStateRestored(savedInstanceState);
     }
 
+    @Override
+    public void onTaskError(RetrofitError error) {
+        ToastText(getActivity().getResources().getString(R.string.spotifyError) + " " + error.toString());
+    }
+
     public class FancyAdapter extends RecyclerView.Adapter<TracksViewHolder> {
 
         private List<MyTrack> trackList;
@@ -272,13 +278,12 @@ public class TopTracksActivityFragment extends Fragment {
 
     public class retrieveSpotifyData extends AsyncTask<String, Void, Tracks> {
 
-        //private final String LOG_TAG = retrieveSpotifyData.class.getSimpleName();
+        private OnTaskError listener;
 
 
 
         @Override
         protected Tracks doInBackground(String... params) {
-            Looper.prepare();
 
             // We pass the filter text and call spotify wrapper API to get the artists
             Tracks tracks = null;
@@ -292,7 +297,8 @@ public class TopTracksActivityFragment extends Fragment {
                 Log.d("COUNTRY", Utility.getPreferredLocation(getActivity()));
                 tracks = spotify.getArtistTopTrack(params[0], map);
             }catch (RetrofitError e){
-                ToastText(getActivity().getResources().getString(R.string.spotifyError) + " " + e.toString());
+                listener.onTaskError(e);
+
             }
 
 
@@ -328,10 +334,14 @@ public class TopTracksActivityFragment extends Fragment {
 
         }
 
-        void ToastText(String s){
-            Toast.makeText(getActivity(), s, Toast.LENGTH_SHORT).show();
-        }
+
 
 
     }
+
+    void ToastText(String s){
+        Toast.makeText(getActivity(), s, Toast.LENGTH_SHORT).show();
+    }
+
+
 }

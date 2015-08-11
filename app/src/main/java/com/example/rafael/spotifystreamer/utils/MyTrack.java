@@ -100,7 +100,7 @@ public class MyTrack extends Track implements Parcelable {
             trackBackImage = track.album.images.get(1).url;
         }
         this.trackDuration = String.valueOf(track.duration_ms);
-        this.trackUrl = track.uri;
+        this.trackUrl = track.external_urls.get("spotify");
     }
 
     @Override

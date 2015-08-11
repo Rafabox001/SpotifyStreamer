@@ -13,6 +13,8 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.graphics.Palette;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
@@ -29,6 +31,7 @@ import butterknife.InjectView;
 
 
 public class TopTracksActivity extends AppCompatActivity implements MediaPlayerFragment.OnFragmentInteractionListener{
+    static boolean active = false;
 
     private static final String EXTRA_IMAGE = "com.example.rafael.spotifystreamer.extraImage";
     private static final String EXTRA_TITLE = "com.example.rafael.spotifystreamer.extraTitle";
@@ -85,9 +88,6 @@ public class TopTracksActivity extends AppCompatActivity implements MediaPlayerF
                     .add(R.id.fragment_songs_container, new TopTracksActivityFragment(), TAG_TOP_FRAGMENT)
                     .addToBackStack(TAG_TOP_FRAGMENT)
                     .commit();
-        }else{
-            TopTracksActivityFragment topTracksActivityFragment =  ((TopTracksActivityFragment)getSupportFragmentManager()
-                    .findFragmentByTag(TAG_TOP_FRAGMENT));
         }
 
 
@@ -171,6 +171,39 @@ public class TopTracksActivity extends AppCompatActivity implements MediaPlayerF
 
 
 
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        active = true;
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        active = false;
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        getMenuInflater().inflate(R.menu.menu_top_tracks, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle action bar item clicks here. The action bar will
+        // automatically handle clicks on the Home/Up button, so long
+        // as you specify a parent activity in AndroidManifest.xml.
+        int id = item.getItemId();
+        if (id == R.id.action_settings){
+            Intent i = new Intent(this, SettingsActivity.class);
+            startActivity(i);
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
     }
 
 

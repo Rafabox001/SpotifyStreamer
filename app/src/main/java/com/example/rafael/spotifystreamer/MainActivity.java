@@ -8,12 +8,19 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.Button;
 
 import com.example.rafael.spotifystreamer.fragments.SpotifySearchFragment;
 import com.example.rafael.spotifystreamer.fragments.TopTracksActivityFragment;
 
+import butterknife.ButterKnife;
+import butterknife.InjectView;
+import butterknife.OnClick;
+
 
 public class MainActivity extends AppCompatActivity implements SpotifySearchFragment.Callback{
+    public static boolean active = false;
+    @InjectView(R.id.nowPlaying)Button nowPlaying;
 
     private static final String DETAILFRAGMENT_TAG = "DFTAG";
     private final String LOG_TAG = MainActivity.class.getSimpleName();
@@ -26,6 +33,7 @@ public class MainActivity extends AppCompatActivity implements SpotifySearchFrag
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        ButterKnife.inject(this);
 
         initToolbar();
 
@@ -130,5 +138,22 @@ public class MainActivity extends AppCompatActivity implements SpotifySearchFrag
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        active = true;
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        active = false;
+    }
+
+    @OnClick(R.id.nowPlaying)
+    public void navigateToControls(){
+
     }
 }

@@ -16,8 +16,13 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.LocalBroadcastManager;
+import android.support.v4.view.MenuItemCompat;
+import android.support.v7.widget.ShareActionProvider;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
@@ -27,6 +32,7 @@ import android.widget.SeekBar;
 import android.widget.TextView;
 
 import com.example.rafael.spotifystreamer.MainActivity;
+import com.example.rafael.spotifystreamer.SettingsActivity;
 import com.example.rafael.spotifystreamer.TopTracksActivity;
 import com.example.rafael.spotifystreamer.utils.MusicController;
 import com.example.rafael.spotifystreamer.utils.MyTrack;
@@ -63,6 +69,8 @@ public class MediaPlayerFragment extends Fragment implements MediaPlayerControl{
     private MusicController controller;
     private MediaSessionManager mManager;
     private MediaSession mSession;
+    private ShareActionProvider mShareActionProvider;
+    private static final String SPOTIFYSTREAMER_SHARE_HASHTAG = " #SpotifyStreamerApp";
 
     public static final String ACTION_PLAY = "action_play";
     public static final String ACTION_PAUSE = "action_pause";
@@ -100,6 +108,7 @@ public class MediaPlayerFragment extends Fragment implements MediaPlayerControl{
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setHasOptionsMenu(true);
         if (getArguments() != null) {
             Bundle bundle = getArguments();
             mPlayList = bundle.getParcelableArrayList(SONGS_LIST_PARAM);
@@ -112,6 +121,8 @@ public class MediaPlayerFragment extends Fragment implements MediaPlayerControl{
             @Override
             public void onReceive(Context context, Intent intent) {
                 int pos = intent.getIntExtra("position", 0);
+                mPosition = pos;
+                mShareActionProvider.setShareIntent(createShareSpotifyStreamerIntent());
                 updateUI(pos);
                 seekHandler.removeCallbacks(run);
                 setSeekBar();
@@ -119,6 +130,46 @@ public class MediaPlayerFragment extends Fragment implements MediaPlayerControl{
             }
         };
 
+    }
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        inflater.inflate(R.menu.menu_media_player, menu);
+
+        // Retrieve the share menu item
+        MenuItem menuItem = menu.findItem(R.id.action_share);
+
+        // Get the provider and hold onto it to set/change the share intent.
+        mShareActionProvider = (ShareActionProvider) MenuItemCompat.getActionProvider(menuItem);
+
+        // If onLoadFinished happens before this, we can go ahead and set the share intent now.
+        if (mPlayList != null) {
+            mShareActionProvider.setShareIntent(createShareSpotifyStreamerIntent());
+        }
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle action bar item clicks here. The action bar will
+        // automatically handle clicks on the Home/Up button, so long
+        // as you specify a parent activity in AndroidManifest.xml.
+        int id = item.getItemId();
+        if (id == R.id.action_share){
+            mShareActionProvider.setShareIntent(createShareSpotifyStreamerIntent());
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+
+
+    private Intent createShareSpotifyStreamerIntent() {
+        Intent shareIntent = new Intent(Intent.ACTION_SEND);
+        shareIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET);
+        shareIntent.setType("text/plain");
+        shareIntent.putExtra(Intent.EXTRA_TEXT,
+                mPlayList.get(mPosition).getTrackUrl() + SPOTIFYSTREAMER_SHARE_HASHTAG);
+        return shareIntent;
     }
 
 
